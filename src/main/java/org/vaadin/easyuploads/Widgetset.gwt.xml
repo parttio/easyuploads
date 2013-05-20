@@ -3,7 +3,6 @@
 <module>
 	<!-- WS Compiler: manually edited -->
 
-	<inherits name="elemental.Elemental" />
 	<inherits name="org.swfupload.SWFUpload" />
 	<inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
 

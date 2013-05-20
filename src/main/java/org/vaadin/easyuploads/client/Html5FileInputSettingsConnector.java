@@ -3,8 +3,7 @@ package org.vaadin.easyuploads.client;
 import org.vaadin.easyuploads.Html5FileInputSettings;
 import org.vaadin.easyuploads.client.ui.VCustomUpload;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.Node;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.VConsole;
@@ -12,8 +11,6 @@ import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.shared.ui.Connect;
-
-import elemental.html.InputElement;
 
 @Connect(Html5FileInputSettings.class)
 public class Html5FileInputSettingsConnector extends AbstractExtensionConnector {
@@ -24,7 +21,7 @@ public class Html5FileInputSettingsConnector extends AbstractExtensionConnector 
 		final VCustomUpload widget = getUpload();
 		if (input == null || !widget.getElement().isOrHasChild((Node) input)) {
 			VConsole.error("Registering " + (input == null));
-			input = (InputElement) widget.fu.getElement();
+			input = (InputElement) widget.fu.getElement().cast();
 		}
 		return input;
 	}

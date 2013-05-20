@@ -1,13 +1,13 @@
 package org.vaadin.easyuploads.client.ui;
 
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.user.client.Element;
 import com.vaadin.client.VConsole;
 import com.vaadin.client.ui.VNotification;
 import com.vaadin.client.ui.VUpload;
+import com.vaadin.client.ui.dd.VHtml5File;
 
-import elemental.html.File;
-import elemental.html.FileList;
-import elemental.html.InputElement;
 
 public class VCustomUpload extends VUpload {
 
@@ -20,17 +20,17 @@ public class VCustomUpload extends VUpload {
 			super.submit();
 		} else {
 			VConsole.error("cancelled upload due to too large file");
-			((InputElement) fu.getElement()).setValue(null);
+			((InputElement) fu.getElement().cast()).setValue(null);
 		}
 	}
 
 	private boolean checkSize(int maxSize) {
 		try {
-			InputElement ie = (InputElement) fu.getElement();
+			InputElement ie = (InputElement) fu.getElement().cast();
+			JsArray<VHtml5File> files = getFiles(ie);
 
-			FileList files = ie.getFiles();
-			for (int i = 0; i < files.getLength(); i++) {
-				File item = files.item(i);
+			for (int i = 0; i < files.length(); i++) {
+				VHtml5File item = files.get(i);
 				if (item.getSize() > maxSize) {
 					VNotification.createNotification(1000,
 							client.getUIConnector().getWidget()).show(
@@ -52,6 +52,11 @@ public class VCustomUpload extends VUpload {
 		}
 		return true;
 	}
+
+	private static native final JsArray<VHtml5File> getFiles(InputElement ie) 
+	/*-{
+		return ie.files;
+	}-*/;
 
 	/**
 	 * @param element
