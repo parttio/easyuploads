@@ -24,4 +24,6 @@ public interface MultiUploadHandler {
 
 	void filesQueued(Collection<FileDetail> pendingFileNames);
 
+	boolean isInterrupted();
+
 }

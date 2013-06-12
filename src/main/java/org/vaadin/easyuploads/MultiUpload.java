@@ -20,155 +20,155 @@ import com.vaadin.ui.LegacyComponent;
 @SuppressWarnings("serial")
 public class MultiUpload extends AbstractComponent implements LegacyComponent {
 
-    List<FileDetail> pendingFiles = new ArrayList<FileDetail>();
+	List<FileDetail> pendingFiles = new ArrayList<FileDetail>();
 
-    private MultiUploadHandler receiver;
+	private MultiUploadHandler receiver;
 
-    StreamVariable streamVariable = new StreamVariable() {
+	StreamVariable streamVariable = new StreamVariable() {
 
-        public void streamingStarted(StreamingStartEvent event) {
-            final FileDetail next = getPendingFileNames().iterator().next();
-            receiver.streamingStarted(new StreamingStartEvent() {
+		public void streamingStarted(StreamingStartEvent event) {
+			final FileDetail next = getPendingFileNames().iterator().next();
+			receiver.streamingStarted(new StreamingStartEvent() {
 
-                public String getMimeType() {
-                    return next.getMimeType();
-                }
+				public String getMimeType() {
+					return next.getMimeType();
+				}
 
-                public String getFileName() {
-                    return next.getFileName();
-                }
+				public String getFileName() {
+					return next.getFileName();
+				}
 
-                public long getContentLength() {
-                    return next.getContentLength();
-                }
+				public long getContentLength() {
+					return next.getContentLength();
+				}
 
-                public long getBytesReceived() {
-                    return 0;
-                }
+				public long getBytesReceived() {
+					return 0;
+				}
 
-                public void disposeStreamVariable() {
+				public void disposeStreamVariable() {
 
-                }
-            });
-        }
+				}
+			});
+		}
 
-        public void streamingFinished(final StreamingEndEvent event) {
+		public void streamingFinished(final StreamingEndEvent event) {
 
-            final FileDetail next = getPendingFileNames().iterator().next();
+			final FileDetail next = getPendingFileNames().iterator().next();
 
-            receiver.streamingFinished(new StreamingEndEvent() {
+			receiver.streamingFinished(new StreamingEndEvent() {
 
-                public String getMimeType() {
-                    return next.getMimeType();
-                }
+				public String getMimeType() {
+					return next.getMimeType();
+				}
 
-                public String getFileName() {
-                    return next.getFileName();
-                }
+				public String getFileName() {
+					return next.getFileName();
+				}
 
-                public long getContentLength() {
-                    return next.getContentLength();
-                }
+				public long getContentLength() {
+					return next.getContentLength();
+				}
 
-                public long getBytesReceived() {
-                    return event.getBytesReceived();
-                }
+				public long getBytesReceived() {
+					return event.getBytesReceived();
+				}
 
-            });
-            pendingFiles.remove(0);
-        }
+			});
+			pendingFiles.remove(0);
+		}
 
-        public void streamingFailed(StreamingErrorEvent event) {
-            receiver.streamingFailed(event);
-        }
+		public void streamingFailed(StreamingErrorEvent event) {
+			receiver.streamingFailed(event);
+		}
 
-        public void onProgress(StreamingProgressEvent event) {
-            receiver.onProgress(event);
-        }
+		public void onProgress(StreamingProgressEvent event) {
+			receiver.onProgress(event);
+		}
 
-        public boolean listenProgress() {
-            return true;
-        }
+		public boolean listenProgress() {
+			return true;
+		}
 
-        public boolean isInterrupted() {
-            return false;
-        }
+		public boolean isInterrupted() {
+			return receiver.isInterrupted();
+		}
 
-        public OutputStream getOutputStream() {
-            return receiver.getOutputStream();
-        }
-    };
+		public OutputStream getOutputStream() {
+			return receiver.getOutputStream();
+		}
+	};
 
-    private boolean ready;
+	private boolean ready;
 
-    public void setHandler(MultiUploadHandler receiver) {
-        this.receiver = receiver;
-    }
+	public void setHandler(MultiUploadHandler receiver) {
+		this.receiver = receiver;
+	}
 
-    @Override
-    public void paintContent(PaintTarget target) throws PaintException {
-//        super.paintContent(target);
-        target.addVariable(this, "target", streamVariable);
-        if (ready) {
-            target.addAttribute("ready", true);
-            ready = false;
-        }
-        target.addAttribute("buttoncaption", getButtonCaption());
-    }
+	@Override
+	public void paintContent(PaintTarget target) throws PaintException {
+		// super.paintContent(target);
+		target.addVariable(this, "target", streamVariable);
+		if (ready) {
+			target.addAttribute("ready", true);
+			ready = false;
+		}
+		target.addAttribute("buttoncaption", getButtonCaption());
+	}
 
-    @Override
-    public void changeVariables(Object source, Map<String, Object> variables) {
-//        super.changeVariables(source, variables);
-        if (variables.containsKey("filequeue")) {
-            String[] filequeue = (String[]) variables.get("filequeue");
-            List<FileDetail> newFiles = new ArrayList<FileDetail>(
-                    filequeue.length);
-            for (String string : filequeue) {
-                newFiles.add(new FileDetail(string));
-            }
-            receiver.filesQueued(newFiles);
-            pendingFiles.addAll(newFiles);
-            requestRepaint();
-            ready = true;
-        }
-    }
+	@Override
+	public void changeVariables(Object source, Map<String, Object> variables) {
+		// super.changeVariables(source, variables);
+		if (variables.containsKey("filequeue")) {
+			String[] filequeue = (String[]) variables.get("filequeue");
+			List<FileDetail> newFiles = new ArrayList<FileDetail>(
+					filequeue.length);
+			for (String string : filequeue) {
+				newFiles.add(new FileDetail(string));
+			}
+			receiver.filesQueued(newFiles);
+			pendingFiles.addAll(newFiles);
+			requestRepaint();
+			ready = true;
+		}
+	}
 
-    public Collection<FileDetail> getPendingFileNames() {
-        return Collections.unmodifiableCollection(pendingFiles);
-    }
+	public Collection<FileDetail> getPendingFileNames() {
+		return Collections.unmodifiableCollection(pendingFiles);
+	}
 
-    public void setButtonCaption(String buttonCaption) {
-        this.buttonCaption = buttonCaption;
-    }
+	public void setButtonCaption(String buttonCaption) {
+		this.buttonCaption = buttonCaption;
+	}
 
-    public String getButtonCaption() {
-        return buttonCaption;
-    }
+	public String getButtonCaption() {
+		return buttonCaption;
+	}
 
-    public static final class FileDetail {
-        private String caption;
-        private String mimeType = "todo/todo";
-        private int parseInt;
+	public static final class FileDetail {
+		private String caption;
+		private String mimeType = "todo/todo";
+		private int parseInt;
 
-        public FileDetail(String data) {
-            String[] split = data.split("---xXx---");
-            caption = split[1];
-            parseInt = Integer.parseInt(split[0]);
-        }
+		public FileDetail(String data) {
+			String[] split = data.split("---xXx---");
+			caption = split[1];
+			parseInt = Integer.parseInt(split[0]);
+		}
 
-        public long getContentLength() {
-            return parseInt;
-        }
+		public long getContentLength() {
+			return parseInt;
+		}
 
-        public String getFileName() {
-            return caption;
-        }
+		public String getFileName() {
+			return caption;
+		}
 
-        public String getMimeType() {
-            return mimeType;
-        }
-    }
+		public String getMimeType() {
+			return mimeType;
+		}
+	}
 
-    private String buttonCaption = "...";
+	private String buttonCaption = "...";
 
 }
