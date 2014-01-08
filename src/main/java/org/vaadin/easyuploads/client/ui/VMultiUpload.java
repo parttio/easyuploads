@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.vaadin.client.ApplicationConnection;
+import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.Paintable;
 import com.vaadin.client.UIDL;
 import com.vaadin.client.VConsole;
@@ -33,6 +34,11 @@ public class VMultiUpload extends SimplePanel implements Paintable {
 
 	private final class MyFileUpload extends FileUpload {
 
+		//  Starting from Chrome 30 we should prevent the onFocus hack or
+		//  otherwise the native file dialog is opened twice.
+		private final boolean isChrome30 = (BrowserInfo.get().isChrome() && BrowserInfo
+				.get().getBrowserMajorVersion() >= 30);
+	        
 		public MyFileUpload() {
 			getElement().setPropertyString("multiple", "multiple");
 		}
@@ -44,7 +50,7 @@ public class VMultiUpload extends SimplePanel implements Paintable {
 				if (hasFiles()) {
 					submit();
 				}
-			} else if (event.getTypeInt() == Event.ONFOCUS) {
+			} else if (!isChrome30 && event.getTypeInt() == Event.ONFOCUS) {
 				// IE and user has clicked on hidden textarea part of upload
 				// field. Manually open file selector, other browsers do it by
 				// default.
