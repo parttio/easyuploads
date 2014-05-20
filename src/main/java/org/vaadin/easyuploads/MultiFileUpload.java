@@ -222,7 +222,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
 	@SuppressWarnings("deprecation")
 	protected boolean supportsFileDrops() {
-		WebBrowser browser = VaadinSession.getCurrent().getBrowser();
+		WebBrowser browser = getUI().getPage().getWebBrowser();
 		if (browser.isChrome()) {
 			return true;
 		} else if (browser.isFirefox()) {
