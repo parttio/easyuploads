@@ -147,17 +147,20 @@ public class MultiUpload extends AbstractComponent implements LegacyComponent {
 
 	public static final class FileDetail {
 		private String caption;
-		private String mimeType = "todo/todo";
-		private int parseInt;
+		private String mimeType = "application/octet-stream";
+		private long contentLength;
 
 		public FileDetail(String data) {
 			String[] split = data.split("---xXx---");
 			caption = split[1];
-			parseInt = Integer.parseInt(split[0]);
+			contentLength = Long.parseLong(split[0]);
+      if (split.length >= 3) {
+				mimeType = split[2];
+			}
 		}
 
 		public long getContentLength() {
-			return parseInt;
+			return contentLength;
 		}
 
 		public String getFileName() {
