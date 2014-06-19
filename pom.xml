@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.vaadin.addon</groupId>
 	<artifactId>easyuploads</artifactId>
-	<version>7.2.1-SNAPSHOT</version>
+	<version>7.2.1</version>
 	<name>EasyUploads</name>
 
 	<organization>
@@ -223,7 +222,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -244,7 +243,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -342,7 +341,12 @@
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
-
+	 <dependency>
+	  <groupId>org.peimari</groupId>
+	  <artifactId>maddon</artifactId>
+	  <version>1.6</version>
+	  <type>jar</type>
+	 </dependency>
 	</dependencies>
 
 </project>
