@@ -1,17 +1,5 @@
 package org.vaadin.easyuploads;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-
 import com.vaadin.data.Buffered;
 import com.vaadin.data.Property;
 import com.vaadin.data.Validatable;
@@ -31,6 +19,18 @@ import com.vaadin.ui.Upload.ProgressListener;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.StartedEvent;
 import com.vaadin.ui.Upload.StartedListener;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import org.vaadin.maddon.label.RichText;
 
 /**
  * UploadField is a helper class that uses rather low level {@link Upload}
@@ -81,7 +81,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     private UploadFieldReceiver receiver;
 
     private Upload upload;
-    private Label display = new Label("", Label.CONTENT_XHTML);
+    private RichText display = new RichText("");
 
     private ProgressIndicator progress = new ProgressIndicator();
 
@@ -336,7 +336,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     protected void updateDisplay() {
         if (!receiver.isEmpty()) {
-            display.setValue(getDisplayDetails());
+            display.setRichText(getDisplayDetails());
             if (display.getParent() == null) {
                 getRootLayout().addComponent(display);
             }
