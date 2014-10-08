@@ -239,30 +239,31 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             mimeType = null;
             fileName = null;
             outputBuffer = new ByteArrayOutputStream();
-            FieldType fieldType2 = getFieldType();
-            switch (fieldType2) {
-            case BYTE_ARRAY:
-                byte[] newValueBytes = (byte[]) newValue;
-                try {
-                    outputBuffer.write(newValueBytes);
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+            if(newValue != null) {
+                FieldType fieldType2 = getFieldType();
+                switch (fieldType2) {
+                case BYTE_ARRAY:
+                    byte[] newValueBytes = (byte[]) newValue;
+                    try {
+                        outputBuffer.write(newValueBytes);
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                    break;
+                case UTF8_STRING:
+                    try {
+                        String newValueStr = (String) newValue;
+                        outputBuffer.write(newValueStr.getBytes());
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException();
                 }
-                break;
-            case UTF8_STRING:
-                try {
-                    String newValueStr = (String) newValue;
-                    outputBuffer.write(newValueStr.getBytes());
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                break;
-            default:
-                throw new IllegalStateException();
             }
-
         }
 
         public boolean isEmpty() {
