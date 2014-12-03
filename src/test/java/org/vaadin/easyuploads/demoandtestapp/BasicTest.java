@@ -1,28 +1,18 @@
 package org.vaadin.easyuploads.demoandtestapp;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
-import org.vaadin.easyuploads.FileBuffer;
-import org.vaadin.easyuploads.FileFactory;
-import org.vaadin.easyuploads.MultiFileUpload;
-import org.vaadin.easyuploads.UploadField;
+import org.vaadin.easyuploads.*;
 import org.vaadin.easyuploads.UploadField.FieldType;
 import org.vaadin.easyuploads.UploadField.StorageMode;
 
-import com.vaadin.data.util.ObjectProperty;
-import com.vaadin.server.Resource;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
+import com.google.common.io.*;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.*;
+import com.vaadin.server.*;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
 
 public class BasicTest extends AbstractTest {
 
@@ -34,7 +24,7 @@ public class BasicTest extends AbstractTest {
                 + uploadField.getFieldType());
 
         Button b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField.getValue();
                 Notification.show("Value:" + value);
@@ -50,7 +40,7 @@ public class BasicTest extends AbstractTest {
                 + uploadField2.getFieldType());
 
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField2.getValue();
                 Notification.show("Value:" + value);
@@ -88,7 +78,7 @@ public class BasicTest extends AbstractTest {
 
 
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadFieldHtml5Configured.getValue();
                 Notification.show("Value:" + value);
@@ -109,9 +99,14 @@ public class BasicTest extends AbstractTest {
                 "propertyvalue"));
         uploadField4.setWriteThrough(false);
         mainWindow.addComponent(uploadField4);
-
+        uploadField4.addListener(new ValueChangeListener() {
+           @Override
+           public void valueChange(ValueChangeEvent event) {
+              Notification.show("ValueChangeEvent fired.");
+              }
+        });
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField4.getValue();
                 Notification.show("Value:" + value);
@@ -119,7 +114,7 @@ public class BasicTest extends AbstractTest {
         });
         mainWindow.addComponent(b);
         b = new Button("Discard");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 uploadField4.discard();
                 Object value = uploadField4.getValue();
@@ -135,7 +130,7 @@ public class BasicTest extends AbstractTest {
                 + uploadField5.getFieldType());
 
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField5.getValue();
                 Notification.show("Value:" + value);
@@ -179,7 +174,7 @@ public class BasicTest extends AbstractTest {
                         + ", overridden methods to display possibly loaded PNG in preview.");
 
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField6.getValue();
                 Notification.show("Value:" + value);
@@ -226,7 +221,7 @@ public class BasicTest extends AbstractTest {
             }
         };
         multiFileUpload2.setCaption("MultiFileUpload (with root dir)");
-        multiFileUpload2.setRootDirectory("/Users/Shared/tmp/");
+        multiFileUpload2.setRootDirectory(Files.createTempDir().toString());
         mainWindow.addComponent(multiFileUpload2);
 
         mainWindow.addComponent(hr());
