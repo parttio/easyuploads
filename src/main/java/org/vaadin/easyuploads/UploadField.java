@@ -304,7 +304,6 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         if (writeTroughMode) {
             commit();
         }
-        fireValueChange();
     }
 
     public Object getValue() {
