@@ -36,7 +36,7 @@ public class BasicTest extends AbstractTest {
                 + uploadField.getFieldType());
 
         Button b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField.getValue();
                 Notification.show("Value:" + value);
@@ -52,7 +52,7 @@ public class BasicTest extends AbstractTest {
                 + uploadField2.getFieldType());
 
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField2.getValue();
                 Notification.show("Value:" + value);
@@ -90,7 +90,7 @@ public class BasicTest extends AbstractTest {
 
 
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadFieldHtml5Configured.getValue();
                 Notification.show("Value:" + value);
@@ -113,7 +113,7 @@ public class BasicTest extends AbstractTest {
         mainWindow.addComponent(uploadField4);
 
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField4.getValue();
                 Notification.show("Value:" + value);
@@ -121,7 +121,7 @@ public class BasicTest extends AbstractTest {
         });
         mainWindow.addComponent(b);
         b = new Button("Discard");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 uploadField4.discard();
                 Object value = uploadField4.getValue();
@@ -137,7 +137,7 @@ public class BasicTest extends AbstractTest {
                 + uploadField5.getFieldType());
 
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField5.getValue();
                 Notification.show("Value:" + value);
@@ -181,7 +181,7 @@ public class BasicTest extends AbstractTest {
                         + ", overridden methods to display possibly loaded PNG in preview.");
 
         b = new Button("Show value");
-        b.addListener(new Button.ClickListener() {
+        b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
                 Object value = uploadField6.getValue();
                 Notification.show("Value:" + value);
