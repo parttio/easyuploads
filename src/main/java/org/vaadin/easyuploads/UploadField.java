@@ -354,7 +354,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         if (isFileDeletesAllowed()) {
             if (deleteButton == null) {
                 deleteButton = new Button(getDeleteCaption());
-                deleteButton.addListener(new Button.ClickListener() {
+                deleteButton.addClickListener(new Button.ClickListener() {
                     public void buttonClick(ClickEvent arg0) {
                         setValue(null);
                         getRootLayout().removeComponent(arg0.getButton());
