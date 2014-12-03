@@ -1095,14 +1095,12 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
 	@Override
 	public void addValueChangeListener(ValueChangeListener listener) {
-		// TODO Auto-generated method stub
-		
+	   	addListener(listener);	
 	}
 
 	@Override
 	public void removeValueChangeListener(ValueChangeListener listener) {
-		// TODO Auto-generated method stub
-		
+		removeListener(listener);
 	}
 	
 	private Html5FileInputSettings html5FileInputSettings;
