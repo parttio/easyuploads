@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.*;
 
 import org.vaadin.easyuploads.FileBuffer;
 import org.vaadin.easyuploads.FileFactory;
@@ -13,6 +14,7 @@ import org.vaadin.easyuploads.UploadField;
 import org.vaadin.easyuploads.UploadField.FieldType;
 import org.vaadin.easyuploads.UploadField.StorageMode;
 
+import com.google.common.io.Files;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
@@ -226,7 +228,7 @@ public class BasicTest extends AbstractTest {
             }
         };
         multiFileUpload2.setCaption("MultiFileUpload (with root dir)");
-        multiFileUpload2.setRootDirectory("/Users/Shared/tmp/");
+        multiFileUpload2.setRootDirectory(Files.createTempDir().toString());
         mainWindow.addComponent(multiFileUpload2);
 
         mainWindow.addComponent(hr());
