@@ -1,30 +1,18 @@
 package org.vaadin.easyuploads.demoandtestapp;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.*;
+import java.io.*;
 
-import org.vaadin.easyuploads.FileBuffer;
-import org.vaadin.easyuploads.FileFactory;
-import org.vaadin.easyuploads.MultiFileUpload;
-import org.vaadin.easyuploads.UploadField;
+import org.vaadin.easyuploads.*;
 import org.vaadin.easyuploads.UploadField.FieldType;
 import org.vaadin.easyuploads.UploadField.StorageMode;
 
-import com.google.common.io.Files;
-import com.vaadin.data.util.ObjectProperty;
-import com.vaadin.server.Resource;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Button;
+import com.google.common.io.*;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.*;
+import com.vaadin.server.*;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
 
 public class BasicTest extends AbstractTest {
 
@@ -111,7 +99,12 @@ public class BasicTest extends AbstractTest {
                 "propertyvalue"));
         uploadField4.setWriteThrough(false);
         mainWindow.addComponent(uploadField4);
-
+        uploadField4.addListener(new ValueChangeListener() {
+           @Override
+           public void valueChange(ValueChangeEvent event) {
+              Notification.show("ValueChangeEvent fired.");
+              }
+        });
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
