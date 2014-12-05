@@ -5,20 +5,15 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Validatable;
 import com.vaadin.data.Validator;
 import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ProgressIndicator;
-import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.FinishedEvent;
 import com.vaadin.ui.Upload.FinishedListener;
 import com.vaadin.ui.Upload.ProgressListener;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.StartedEvent;
 import com.vaadin.ui.Upload.StartedListener;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -30,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+
 import org.vaadin.maddon.label.RichText;
 
 /**
@@ -81,7 +77,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     private UploadFieldReceiver receiver;
 
     private Upload upload;
-    private RichText display = new RichText("");
+    protected Component display;
 
     private ProgressIndicator progress = new ProgressIndicator();
 
@@ -102,6 +98,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         upload.setButtonCaption("Choose File");
         progress.setVisible(false);
         progress.setPollingInterval(500);
+        display = createDisplayComponent();
         buildDefaulLayout();
     }
 
@@ -239,7 +236,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             mimeType = null;
             fileName = null;
             outputBuffer = new ByteArrayOutputStream();
-            if(newValue != null) {
+            if (newValue != null) {
                 FieldType fieldType2 = getFieldType();
                 switch (fieldType2) {
                 case BYTE_ARRAY:
@@ -338,13 +335,21 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     protected void updateDisplay() {
         if (!receiver.isEmpty()) {
-            display.setRichText(getDisplayDetails());
-            if (display.getParent() == null) {
-                getRootLayout().addComponent(display);
-            }
+            updateDisplayComponent();
             addDeleteButton();
         } else if (display.getParent() != null) {
             buildDefaulLayout();
+        }
+    }
+
+    protected Component createDisplayComponent() {
+        return new RichText("");
+    }
+
+    protected void updateDisplayComponent() {
+        ((RichText) display).setRichText(getDisplayDetails());
+        if (display.getParent() == null) {
+            getRootLayout().addComponent(display);
         }
     }
 
@@ -415,7 +420,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     }
 
     public void updateProgress(long readBytes, long contentLength) {
-        progress.setValue((float)readBytes / contentLength);
+        progress.setValue((float) readBytes / contentLength);
     }
 
     public void setFileDeletesAllowed(boolean fileDeletesAllowed) {
@@ -876,7 +881,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         if (validators == null) {
             return true;
         }
-        
+
         try {
             validate();
             return true;
@@ -1075,57 +1080,57 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         return receiver.getLastFileName();
     }
 
-	@Override
-	public void setBuffered(boolean buffered) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void setBuffered(boolean buffered) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public boolean isBuffered() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    }
 
-	@Override
-	public void removeAllValidators() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public boolean isBuffered() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	@Override
-	public void addValueChangeListener(ValueChangeListener listener) {
-	   	addListener(listener);	
-	}
+    @Override
+    public void removeAllValidators() {
+        // TODO Auto-generated method stub
 
-	@Override
-	public void removeValueChangeListener(ValueChangeListener listener) {
-		removeListener(listener);
-	}
-	
-	private Html5FileInputSettings html5FileInputSettings;
-	
-	private Html5FileInputSettings getHtml5FileInputSettings() {
-		if(html5FileInputSettings == null) {
-			html5FileInputSettings = new Html5FileInputSettings(upload);
-		}
-		return html5FileInputSettings;
-	}
+    }
 
-	/**
-	 * @see {@link Html5FileInputSettings#setAcceptFilter(String)}
-	 * @param acceptString
-	 */
-	public void setAcceptFilter(String acceptString) {
-		getHtml5FileInputSettings().setAcceptFilter(acceptString);
-	}
+    @Override
+    public void addValueChangeListener(ValueChangeListener listener) {
+        addListener(listener);
+    }
 
-	/**
-	 * @see {@link Html5FileInputSettings#setMaxFileSize(Integer)}
-	 * @param maxFileSize
-	 */
-	public void setMaxFileSize(int maxFileSize) {
-		getHtml5FileInputSettings().setMaxFileSize(maxFileSize);
-	}
+    @Override
+    public void removeValueChangeListener(ValueChangeListener listener) {
+        removeListener(listener);
+    }
+
+    private Html5FileInputSettings html5FileInputSettings;
+
+    private Html5FileInputSettings getHtml5FileInputSettings() {
+        if (html5FileInputSettings == null) {
+            html5FileInputSettings = new Html5FileInputSettings(upload);
+        }
+        return html5FileInputSettings;
+    }
+
+    /**
+     * @see {@link Html5FileInputSettings#setAcceptFilter(String)}
+     * @param acceptString
+     */
+    public void setAcceptFilter(String acceptString) {
+        getHtml5FileInputSettings().setAcceptFilter(acceptString);
+    }
+
+    /**
+     * @see {@link Html5FileInputSettings#setMaxFileSize(Integer)}
+     * @param maxFileSize
+     */
+    public void setMaxFileSize(int maxFileSize) {
+        getHtml5FileInputSettings().setMaxFileSize(maxFileSize);
+    }
 
 }
