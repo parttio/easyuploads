@@ -13,11 +13,12 @@ import com.vaadin.data.util.*;
 import com.vaadin.server.*;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
+import org.vaadin.addonhelpers.AbstractTest;
 
 public class BasicTest extends AbstractTest {
 
 	@Override
-	Component getTestComponent() {
+	public Component getTestComponent() {
 		VerticalLayout mainWindow = new VerticalLayout();
         final UploadField uploadField = new UploadField();
         uploadField.setCaption("Default mode: temp files, fieldType:"

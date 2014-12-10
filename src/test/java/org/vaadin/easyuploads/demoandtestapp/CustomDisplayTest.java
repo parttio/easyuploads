@@ -11,11 +11,12 @@ import org.vaadin.easyuploads.UploadField.FieldType;
 
 import com.vaadin.server.*;
 import com.vaadin.ui.*;
+import org.vaadin.addonhelpers.AbstractTest;
 
 public class CustomDisplayTest extends AbstractTest {
 
     @Override
-    Component getTestComponent() {
+    public Component getTestComponent() {
         VerticalLayout layout = new VerticalLayout();
         ImagePreviewField upload = new ImagePreviewField();
         upload.setCaption("Custom prview for images.");
