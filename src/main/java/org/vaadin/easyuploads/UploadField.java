@@ -75,7 +75,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     private static final int MAX_SHOWN_BYTES = 5;
 
     private UploadFieldReceiver receiver;
-
+    private boolean displayUpload = true;
     private Upload upload;
     protected Component display;
 
@@ -334,7 +334,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     }
 
     protected void updateDisplay() {
-        if (!receiver.isEmpty()) {
+        if (!receiver.isEmpty() && displayUpload) {
             updateDisplayComponent();
             addDeleteButton();
         } else if (display.getParent() != null) {
@@ -1131,6 +1131,19 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      */
     public void setMaxFileSize(int maxFileSize) {
         getHtml5FileInputSettings().setMaxFileSize(maxFileSize);
+    }
+
+    public boolean isDisplayUpload() {
+        return displayUpload;
+    }
+
+    /**
+     * If set to true, the uploaded file is displayed within the component.
+     * 
+     * @param displayUpload
+     */
+    public void setDisplayUpload(boolean displayUpload) {
+        this.displayUpload = displayUpload;
     }
 
 }
