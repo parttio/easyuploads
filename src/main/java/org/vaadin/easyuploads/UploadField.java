@@ -152,6 +152,11 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         }
     }
 
+    @Override
+    public void clear() {
+        receiver.setValue(null);
+    }
+
     public enum StorageMode {
         MEMORY, FILE
     }
@@ -263,6 +268,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             }
         }
 
+        @Override
         public boolean isEmpty() {
             return outputBuffer == null || outputBuffer.size() == 0;
         }
@@ -644,7 +650,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * 
      * In general, "empty" state is same as null..
      */
-    protected boolean isEmpty() {
+    public boolean isEmpty() {
         return receiver.isEmpty();
     }
 

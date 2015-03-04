@@ -1,7 +1,5 @@
 package org.vaadin.easyuploads;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.vaadin.easyuploads.client.Html5FileInputState;
 
 import com.vaadin.server.AbstractExtension;
@@ -24,12 +22,6 @@ public class Html5FileInputSettings extends AbstractExtension {
 	@Override
 	public void beforeClientResponse(boolean initial) {
 		super.beforeClientResponse(initial);
-	}
-
-	@Override
-	public JSONObject encodeState() throws JSONException {
-		// TODO Auto-generated method stub
-		return super.encodeState();
 	}
 
 	/**
