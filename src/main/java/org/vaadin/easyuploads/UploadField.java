@@ -327,6 +327,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         progress.setVisible(false);
         lastFileName = event.getFilename();
         updateDisplay();
+        if (writeTroughMode) {
+            commit();
+        }
         fireValueChange();
     }
 
