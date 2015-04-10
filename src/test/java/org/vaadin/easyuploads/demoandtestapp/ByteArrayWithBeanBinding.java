@@ -41,10 +41,9 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
 
         value.setFieldType(FieldType.BYTE_ARRAY);
 
-        value.setAcceptFilter("image/*");
-        value.setMaxFileSize(1000000);
-
         final Entity entity = new Entity();
+        
+        entity.setValue("Foobar".getBytes());
 
         BeanFieldGroup.bindFieldsUnbuffered(entity, this);
 

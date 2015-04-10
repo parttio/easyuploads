@@ -394,14 +394,16 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     /**
      * @return the string representing the file. The default implementation
-     *         shows name, size and first characters of the file if in UTF8
-     *         mode.
+     * shows name, size and first characters of the file if in UTF8 mode.
      */
     protected String getDisplayDetails() {
         StringBuilder sb = new StringBuilder();
+        if(getFieldType() == FieldType.FILE) {
         sb.append("File: ");
         sb.append(lastFileName);
-        sb.append("</br> <em>");
+            sb.append("</br> ");
+        }
+        sb.append("<em>");
         Object value = getValue();
         if (getFieldType() == FieldType.BYTE_ARRAY) {
             byte[] ba = (byte[]) value;
