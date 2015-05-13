@@ -1076,7 +1076,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         return receiver.getLastMimeType();
     }
 
-    protected String getLastFileName() {
+    public String getLastFileName() {
         return receiver.getLastFileName();
     }
 
