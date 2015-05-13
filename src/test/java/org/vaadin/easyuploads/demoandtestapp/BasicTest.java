@@ -7,17 +7,20 @@ import org.vaadin.easyuploads.UploadField.FieldType;
 import org.vaadin.easyuploads.UploadField.StorageMode;
 
 import com.google.common.io.*;
+import com.vaadin.annotations.Theme;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.*;
 import com.vaadin.server.*;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
+import org.vaadin.addonhelpers.AbstractTest;
 
+@Theme("valo")
 public class BasicTest extends AbstractTest {
 
 	@Override
-	Component getTestComponent() {
+	public Component getTestComponent() {
 		VerticalLayout mainWindow = new VerticalLayout();
         final UploadField uploadField = new UploadField();
         uploadField.setCaption("Default mode: temp files, fieldType:"
@@ -231,6 +234,12 @@ public class BasicTest extends AbstractTest {
         mainWindow.addComponent(multiFileUpload3);
 
         return mainWindow;
+    }
+
+    @Override
+    protected void setup() {
+        super.setup();
+        content.setSizeUndefined();
     }
 
     class SlowMultiFileUpload extends MultiFileUpload {

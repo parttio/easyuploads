@@ -152,6 +152,11 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         }
     }
 
+    @Override
+    public void clear() {
+        receiver.setValue(null);
+    }
+
     public enum StorageMode {
         MEMORY, FILE
     }
@@ -263,6 +268,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             }
         }
 
+        @Override
         public boolean isEmpty() {
             return outputBuffer == null || outputBuffer.size() == 0;
         }
@@ -321,6 +327,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         progress.setVisible(false);
         lastFileName = event.getFilename();
         updateDisplay();
+        if (writeTroughMode) {
+            commit();
+        }
         fireValueChange();
     }
 
@@ -385,14 +394,16 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     /**
      * @return the string representing the file. The default implementation
-     *         shows name, size and first characters of the file if in UTF8
-     *         mode.
+     * shows name, size and first characters of the file if in UTF8 mode.
      */
     protected String getDisplayDetails() {
         StringBuilder sb = new StringBuilder();
+        if(getFieldType() == FieldType.FILE) {
         sb.append("File: ");
         sb.append(lastFileName);
-        sb.append("</br> <em>");
+            sb.append("</br> ");
+        }
+        sb.append("<em>");
         Object value = getValue();
         if (getFieldType() == FieldType.BYTE_ARRAY) {
             byte[] ba = (byte[]) value;
@@ -644,7 +655,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * 
      * In general, "empty" state is same as null..
      */
-    protected boolean isEmpty() {
+    public boolean isEmpty() {
         return receiver.isEmpty();
     }
 
