@@ -55,26 +55,27 @@ public class BasicTest extends AbstractTest {
 
         final UploadField uploadField3 = new UploadField();
         uploadField3.setFieldType(FieldType.FILE);
-        uploadField3.setCaption("Storagemode: /Users/Shared/tmp/ , fieldType:"
+        final File tempDir = Files.createTempDir();
+        uploadField3.setCaption("Storagemode: "+tempDir +" , fieldType:"
                 + uploadField3.getFieldType());
 
         uploadField3.setFileFactory(new FileFactory() {
             public File createFile(String fileName, String mimeType) {
-                File f = new File("/Users/Shared/tmp/" + fileName);
+                File f = new File(tempDir, fileName);
                 return f;
             }
         });
         
         final UploadField uploadFieldHtml5Configured = new UploadField();
         uploadFieldHtml5Configured.setFieldType(FieldType.FILE);
-        uploadFieldHtml5Configured.setCaption("Storagemode: /Users/Shared/tmp/ , fieldType:"
+        uploadFieldHtml5Configured.setCaption("Storagemode: "+tempDir +" , fieldType:"
                 + uploadFieldHtml5Configured.getFieldType() + " just images, max 1000000");
         uploadFieldHtml5Configured.setAcceptFilter("image/*");
         uploadFieldHtml5Configured.setMaxFileSize(1000000);
 
         uploadFieldHtml5Configured.setFileFactory(new FileFactory() {
             public File createFile(String fileName, String mimeType) {
-                File f = new File("/Users/Shared/tmp/" + fileName);
+                File f = new File(tempDir, fileName);
                 return f;
             }
         });
