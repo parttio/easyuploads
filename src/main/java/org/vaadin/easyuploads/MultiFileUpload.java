@@ -62,7 +62,17 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
     private Layout progressBars;
-    private CssLayout uploads = new CssLayout();
+    private CssLayout uploads = new CssLayout() {
+
+        @Override
+        protected String getCss(Component c) {
+            if(getComponent(uploads.getComponentCount() -1) != c) {
+                return "overflow: hidden; position: absolute;";
+            }
+            return "overflow:hidden;";
+        }
+        
+    };
     private String uploadButtonCaption = "...";
 
     public MultiFileUpload() {
@@ -105,6 +115,9 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 handleFile(file, event.getFileName(), event.getMimeType(),
                         event.getBytesReceived());
                 receiver.setValue(null);
+                if(upload.getPendingFileNames().isEmpty()) {
+                    uploads.removeComponent(upload);
+                }
             }
 
             public void streamingFailed(StreamingErrorEvent event) {
@@ -143,6 +156,8 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                     pi.setVisible(true);
                     indicators.add(pi);
                 }
+                upload.setHeight("0px");
+                prepareUpload();
             }
 
             @Override
