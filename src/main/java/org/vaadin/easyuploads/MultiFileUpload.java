@@ -291,7 +291,8 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 getTransferable();
         Html5File[] files = transferable.getFiles();
         for (final Html5File html5File : files) {
-            final ProgressIndicator pi = new ProgressIndicator();
+            final ProgressBar pi = createProgressIndicator();
+            ensurePushOrPollingIsEnabled();
             pi.setCaption(html5File.getFileName());
             getprogressBarsLayout().addComponent(pi);
             final FileBuffer receiver = createReceiver();

@@ -367,9 +367,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.peimari</groupId>
-            <artifactId>maddon</artifactId>
-            <version>1.20</version>
+            <groupId>org.vaadin</groupId>
+            <artifactId>viritin</artifactId>
+            <version>1.35</version>
             <type>jar</type>
         </dependency>
     </dependencies>

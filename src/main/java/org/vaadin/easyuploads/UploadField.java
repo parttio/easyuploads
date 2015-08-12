@@ -25,8 +25,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import org.vaadin.viritin.label.RichText;
 
-import org.vaadin.maddon.label.RichText;
 
 /**
  * UploadField is a helper class that uses rather low level {@link Upload}
