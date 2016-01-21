@@ -222,6 +222,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             if (outputBuffer == null) {
                 return null;
             }
+            if (outputBuffer.size() == 0) {
+            	return null;
+            }
             byte[] byteArray = outputBuffer.toByteArray();
             if (getFieldType() == FieldType.BYTE_ARRAY) {
                 return byteArray;
