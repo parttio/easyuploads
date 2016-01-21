@@ -74,6 +74,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         
     };
     private String uploadButtonCaption = "...";
+	private String areatext="<small>DROP<br/>FILES</small>";
 
     public MultiFileUpload() {
         setWidth("200px");
@@ -263,7 +264,11 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     }
 
     protected String getAreaText() {
-        return "<small>DROP<br/>FILES</small>";
+        return areatext;
+    }
+    
+    public void setAreaText(String areatext){
+    	this.areatext=areatext;
     }
 
     @SuppressWarnings("deprecation")
