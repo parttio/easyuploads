@@ -66,21 +66,21 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
     private int maxFileSize = -1;
-    
+
     private Layout progressBars;
     private CssLayout uploads = new CssLayout() {
 
         @Override
         protected String getCss(Component c) {
-            if(getComponent(uploads.getComponentCount() -1) != c) {
+            if (getComponent(uploads.getComponentCount() - 1) != c) {
                 return "overflow: hidden; position: absolute;";
             }
             return "overflow:hidden;";
         }
-        
+
     };
     private String uploadButtonCaption = "...";
-    private String areatext="<small>DROP<br/>FILES</small>";
+    private String areatext = "<small>DROP<br/>FILES</small>";
 
     public MultiFileUpload() {
         setWidth("200px");
@@ -112,7 +112,8 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
             public void streamingStarted(StreamingStartEvent event) {
                 if (maxFileSize > 0 && event.getContentLength() > maxFileSize) {
-                    throw new MaxFileSizeExceededException(event.getContentLength(), maxFileSize);
+                    throw new MaxFileSizeExceededException(event.
+                            getContentLength(), maxFileSize);
                 }
             }
 
@@ -125,7 +126,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 handleFile(file, event.getFileName(), event.getMimeType(),
                         event.getBytesReceived());
                 receiver.setValue(null);
-                if(upload.getPendingFileNames().isEmpty()) {
+                if (upload.getPendingFileNames().isEmpty()) {
                     uploads.removeComponent(upload);
                 }
             }
@@ -275,9 +276,9 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     protected String getAreaText() {
         return areatext;
     }
-    
-    public void setAreaText(String areatext){
-        this.areatext=areatext;
+
+    public void setAreaText(String areatext) {
+        this.areatext = areatext;
     }
 
     @SuppressWarnings("deprecation")
@@ -320,6 +321,11 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 getTransferable();
         Html5File[] files = transferable.getFiles();
         for (final Html5File html5File : files) {
+
+            if (html5File.getFileSize() > maxFileSize) {
+                onMaxSizeExceeded(html5File.getFileSize());
+            }
+
             final ProgressBar pi = createProgressIndicator();
             ensurePushOrPollingIsEnabled();
             pi.setCaption(html5File.getFileName());
@@ -376,19 +382,23 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     public void setMaxFileSize(int maxFileSize) {
         this.maxFileSize = maxFileSize;
         if (maxFileSize > 0) {
+            // TODO figure out if this could be done somehow else, now this 
+            // might override the error hanler set by user, maybe set for 
+            // individual multiuploads instead ??
             setErrorHandler(new DefaultErrorHandler() {
                 @Override
                 public void error(com.vaadin.server.ErrorEvent event) {
                     if (event.getThrowable() != null && event.getThrowable() instanceof UploadException) {
                         Throwable cause = event.getThrowable().getCause();
                         if (cause != null && cause instanceof MaxFileSizeExceededException) {
-                            onMaxSizeExceeded(((MaxFileSizeExceededException) cause).getContentLength());
+                            onMaxSizeExceeded(
+                                    ((MaxFileSizeExceededException) cause).
+                                    getContentLength());
                             return;
                         }
                     }
                     super.error(event);
                 }
-
             });
         } else {
             setErrorHandler(null);
@@ -397,7 +407,9 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
     public void onMaxSizeExceeded(long contentLength) {
         Notification.show(
-                "Max size exceeded " + FileUtils.byteCountToDisplaySize(contentLength) + " > "
-                        + FileUtils.byteCountToDisplaySize(maxFileSize), Notification.Type.ERROR_MESSAGE);
+                "Max size exceeded " + FileUtils.byteCountToDisplaySize(
+                        contentLength) + " > "
+                + FileUtils.byteCountToDisplaySize(maxFileSize),
+                Notification.Type.ERROR_MESSAGE);
     }
 }
