@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.vaadin.easyuploads.MultiUpload.FileDetail;
 import org.vaadin.easyuploads.UploadField.FieldType;
 
@@ -15,11 +16,13 @@ import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
+import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.StreamVariable;
 import com.vaadin.server.StreamVariable.StreamingEndEvent;
 import com.vaadin.server.StreamVariable.StreamingErrorEvent;
 import com.vaadin.server.StreamVariable.StreamingProgressEvent;
 import com.vaadin.server.StreamVariable.StreamingStartEvent;
+import com.vaadin.server.UploadException;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.ui.Component;
@@ -29,6 +32,7 @@ import com.vaadin.ui.DragAndDropWrapper.WrapperTransferable;
 import com.vaadin.ui.Html5File;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.ProgressIndicator;
 import com.vaadin.ui.PushConfiguration;
@@ -61,6 +65,8 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
+    private int maxFileSize = -1;
+    
     private Layout progressBars;
     private CssLayout uploads = new CssLayout() {
 
@@ -74,7 +80,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         
     };
     private String uploadButtonCaption = "...";
-	private String areatext="<small>DROP<br/>FILES</small>";
+    private String areatext="<small>DROP<br/>FILES</small>";
 
     public MultiFileUpload() {
         setWidth("200px");
@@ -105,6 +111,9 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             private LinkedList<ProgressBar> indicators;
 
             public void streamingStarted(StreamingStartEvent event) {
+                if (maxFileSize > 0 && event.getContentLength() > maxFileSize) {
+                    throw new MaxFileSizeExceededException(event.getContentLength(), maxFileSize);
+                }
             }
 
             public void streamingFinished(StreamingEndEvent event) {
@@ -268,7 +277,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     }
     
     public void setAreaText(String areatext){
-    	this.areatext=areatext;
+        this.areatext=areatext;
     }
 
     @SuppressWarnings("deprecation")
@@ -358,5 +367,37 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             });
         }
 
+    }
+
+    public int getMaxFileSize() {
+        return maxFileSize;
+    }
+
+    public void setMaxFileSize(int maxFileSize) {
+        this.maxFileSize = maxFileSize;
+        if (maxFileSize > 0) {
+            setErrorHandler(new DefaultErrorHandler() {
+                @Override
+                public void error(com.vaadin.server.ErrorEvent event) {
+                    if (event.getThrowable() != null && event.getThrowable() instanceof UploadException) {
+                        Throwable cause = event.getThrowable().getCause();
+                        if (cause != null && cause instanceof MaxFileSizeExceededException) {
+                            onMaxSizeExceeded(((MaxFileSizeExceededException) cause).getContentLength());
+                            return;
+                        }
+                    }
+                    super.error(event);
+                }
+
+            });
+        } else {
+            setErrorHandler(null);
+        }
+    }
+
+    public void onMaxSizeExceeded(long contentLength) {
+        Notification.show(
+                "Max size exceeded " + FileUtils.byteCountToDisplaySize(contentLength) + " > "
+                        + FileUtils.byteCountToDisplaySize(maxFileSize), Notification.Type.ERROR_MESSAGE);
     }
 }

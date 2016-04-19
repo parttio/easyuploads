@@ -1,25 +1,42 @@
 package org.vaadin.easyuploads.demoandtestapp;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import org.vaadin.easyuploads.*;
+import org.vaadin.addonhelpers.AbstractTest;
+import org.vaadin.easyuploads.FileBuffer;
+import org.vaadin.easyuploads.FileFactory;
+import org.vaadin.easyuploads.MultiFileUpload;
+import org.vaadin.easyuploads.UploadField;
 import org.vaadin.easyuploads.UploadField.FieldType;
 import org.vaadin.easyuploads.UploadField.StorageMode;
 
-import com.google.common.io.*;
+import com.google.common.io.Files;
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.*;
-import com.vaadin.server.*;
-import com.vaadin.ui.*;
+import com.vaadin.data.util.ObjectProperty;
+import com.vaadin.data.util.converter.StringToIntegerConverter;
+import com.vaadin.server.Resource;
+import com.vaadin.server.StreamResource;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import org.vaadin.addonhelpers.AbstractTest;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Embedded;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 
 @Theme("valo")
 public class BasicTest extends AbstractTest {
 
-	@Override
+	@SuppressWarnings("serial")
+    @Override
 	public Component getTestComponent() {
 		VerticalLayout mainWindow = new VerticalLayout();
         final UploadField uploadField = new UploadField();
@@ -233,6 +250,38 @@ public class BasicTest extends AbstractTest {
         multiFileUpload3.setCaption("MultiFileUpload (simulated slow network)");
         multiFileUpload3.setUploadButtonCaption("Choose File(s)");
         mainWindow.addComponent(multiFileUpload3);
+        
+        FormLayout maxSizeMultiUploadLayout = new FormLayout();
+        maxSizeMultiUploadLayout.setCaption("MultiFileUpload with maxSize");
+        mainWindow.addComponent(maxSizeMultiUploadLayout);
+        final TextField maxSizeField = new TextField();
+        maxSizeField.setNullRepresentation("");
+        maxSizeField.setCaption("Max size : ");
+        maxSizeField.setConverter(new StringToIntegerConverter());
+        maxSizeMultiUploadLayout.addComponent(maxSizeField);
+        final MultiFileUpload multiFileUploadWithMaxSize = new MultiFileUpload() {
+            @Override
+            protected void handleFile(File file, String fileName, String mimeType, long length) {
+                String msg = fileName + " uploaded. Saved to temp file " + file.getAbsolutePath() + " (size " + length
+                        + " bytes)";
+                Notification.show(msg);
+            }
+        };
+        maxSizeField.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                if (maxSizeField.getValue() != null) {
+                    multiFileUploadWithMaxSize.setMaxFileSize((Integer) maxSizeField.getConvertedValue());
+                } else {
+                    multiFileUploadWithMaxSize.setMaxFileSize(0);
+                }
+            }
+        });
+        maxSizeField.setConvertedValue(1048576);
+        
+        maxSizeMultiUploadLayout.addComponent(multiFileUploadWithMaxSize);
+        mainWindow.addComponent(hr());
 
         return mainWindow;
     }
