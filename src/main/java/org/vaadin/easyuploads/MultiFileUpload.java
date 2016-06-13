@@ -68,7 +68,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     private int maxFileSize = -1;
 
     private Layout progressBars;
-    private CssLayout uploads = new CssLayout() {
+    protected CssLayout uploads = new CssLayout() {
 
         @Override
         protected String getCss(Component c) {
@@ -254,12 +254,12 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         }
     }
 
-    private DragAndDropWrapper dropZone;
+    protected DragAndDropWrapper dropZone;
 
     /**
      * Sets up DragAndDropWrapper to accept multi file drops.
      */
-    private void prepareDropZone() {
+    protected void prepareDropZone() {
         if (dropZone == null) {
             Component label = new Label(getAreaText(), Label.CONTENT_XHTML);
             label.setSizeUndefined();
