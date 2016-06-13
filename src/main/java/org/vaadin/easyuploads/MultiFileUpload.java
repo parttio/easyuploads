@@ -324,6 +324,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
             if (maxFileSize != -1 && html5File.getFileSize() > maxFileSize) {
                 onMaxSizeExceeded(html5File.getFileSize());
+                continue;
             }
 
             final ProgressBar pi = createProgressIndicator();
