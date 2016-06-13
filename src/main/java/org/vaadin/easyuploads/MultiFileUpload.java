@@ -290,6 +290,8 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             return true;
         } else if (browser.isSafari()) {
             return true;
+        } else if (browser.isIE() && browser.getBrowserMajorVersion() >= 11) {
+            return true;
         }
         return false;
     }
