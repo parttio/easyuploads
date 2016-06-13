@@ -322,7 +322,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         Html5File[] files = transferable.getFiles();
         for (final Html5File html5File : files) {
 
-            if (html5File.getFileSize() > maxFileSize) {
+            if (maxFileSize != -1 && html5File.getFileSize() > maxFileSize) {
                 onMaxSizeExceeded(html5File.getFileSize());
             }
 
