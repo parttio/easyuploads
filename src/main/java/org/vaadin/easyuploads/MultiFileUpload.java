@@ -34,7 +34,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.ProgressBar;
-import com.vaadin.ui.ProgressIndicator;
 import com.vaadin.ui.PushConfiguration;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -81,6 +80,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     };
     private String uploadButtonCaption = "...";
     private String areatext = "<small>DROP<br/>FILES</small>";
+    private Integer savedPollInterval = null;
 
     public MultiFileUpload() {
         setWidth("200px");
@@ -129,6 +129,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 if (upload.getPendingFileNames().isEmpty()) {
                     uploads.removeComponent(upload);
                 }
+                resetPollIntervalIfNecessary();
             }
 
             public void streamingFailed(StreamingErrorEvent event) {
@@ -138,7 +139,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 for (ProgressBar progressIndicator : indicators) {
                     getprogressBarsLayout().removeComponent(progressIndicator);
                 }
-
+                resetPollIntervalIfNecessary();
             }
 
             public void onProgress(StreamingProgressEvent event) {
@@ -188,9 +189,20 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         PushConfiguration pushConfiguration = current.getPushConfiguration();
         PushMode pushMode = pushConfiguration.getPushMode();
         if (pushMode != PushMode.AUTOMATIC) {
-            if (current.getPollInterval() == -1 || current.getPollInterval() > 1000) {
-                current.setPollInterval(500);
+            int currentPollInterval = current.getPollInterval();
+            if (currentPollInterval == -1 || currentPollInterval > 1000) {
+                savedPollInterval = currentPollInterval;
+                current.setPollInterval(getPollInterval());
             }
+        }
+    }
+
+    protected void resetPollIntervalIfNecessary() {
+        if (savedPollInterval != null
+                && getprogressBarsLayout().getComponentCount() == 0) {
+            UI current = UI.getCurrent();
+            current.setPollInterval(savedPollInterval);
+            savedPollInterval = null;
         }
     }
 
@@ -242,7 +254,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         return receiver;
     }
 
-    protected int getPollinInterval() {
+    protected int getPollInterval() {
         return 500;
     }
 
@@ -364,10 +376,12 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                     handleFile(receiver.getFile(), html5File.getFileName(),
                             html5File.getType(), html5File.getFileSize());
                     receiver.setValue(null);
+                    resetPollIntervalIfNecessary();
                 }
 
                 public void streamingFailed(StreamingErrorEvent event) {
                     getprogressBarsLayout().removeComponent(pi);
+                    resetPollIntervalIfNecessary();
                 }
 
                 public boolean isInterrupted() {
