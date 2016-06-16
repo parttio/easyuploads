@@ -55,6 +55,7 @@ public class MultiUpload extends AbstractComponent implements LegacyComponent {
 		public void streamingFinished(final StreamingEndEvent event) {
 
 			final FileDetail next = getPendingFileNames().iterator().next();
+			pendingFiles.remove(0);
 
 			receiver.streamingFinished(new StreamingEndEvent() {
 
@@ -75,7 +76,6 @@ public class MultiUpload extends AbstractComponent implements LegacyComponent {
 				}
 
 			});
-			pendingFiles.remove(0);
 		}
 
 		public void streamingFailed(StreamingErrorEvent event) {

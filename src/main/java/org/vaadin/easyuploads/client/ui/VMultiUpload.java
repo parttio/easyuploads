@@ -13,7 +13,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -106,10 +105,6 @@ public class VMultiUpload extends SimplePanel implements Paintable {
 
     private boolean enabled = true;
 
-    private Hidden maxfilesize = new Hidden();
-
-    private com.google.gwt.dom.client.Element synthesizedFrame;
-
     private String receiverUri;
 
     private ReadyStateChangeHandler readyStateChangeHandler = new ReadyStateChangeHandler() {
@@ -129,13 +124,12 @@ public class VMultiUpload extends SimplePanel implements Paintable {
                 });
             }
         }
-	};;
+    };
 
-	public VMultiUpload() {
+    public VMultiUpload() {
         super(com.google.gwt.dom.client.Document.get().createDivElement());
 
         setWidget(panel);
-        panel.add(maxfilesize);
         panel.add(fu);
         submitButton = new VButton();
         submitButton.addClickHandler(new ClickHandler() {
@@ -157,7 +151,6 @@ public class VMultiUpload extends SimplePanel implements Paintable {
             return;
         }
         addStyleName(CLASSNAME + "-immediate");
-
 
         this.client = client;
         paintableId = uidl.getId();
@@ -187,7 +180,9 @@ public class VMultiUpload extends SimplePanel implements Paintable {
                         clikcReg = ddw.addDomHandler(new ClickHandler() {
                             @Override
                             public void onClick(ClickEvent event) {
-                                fireNativeClick(fu.getElement());
+                                if (isAttached()) {
+                                    fireNativeClick(fu.getElement());
+                                }
                             }
                         }, ClickEvent.getType());
                     }
@@ -304,7 +299,14 @@ public class VMultiUpload extends SimplePanel implements Paintable {
     @Override
     protected void onDetach() {
         super.onDetach();
-        deregisterFromMultiFileUploadDropArea();
+        new Timer() {
+            @Override
+            public void run() {
+                if (!isAttached()) {
+                    deregisterFromMultiFileUploadDropArea();
+                }
+            }
+        }.schedule(100);
     }
 
     private void deregisterFromMultiFileUploadDropArea() {
