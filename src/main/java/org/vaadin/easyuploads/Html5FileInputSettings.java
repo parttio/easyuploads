@@ -61,6 +61,15 @@ public class Html5FileInputSettings extends AbstractExtension {
 		getState().accept = accept;
 	}
 
+        /**
+         * Sets the maximum file count that should be accepted.
+         * 
+         * @param maxCount
+         */
+        public void setMaxFileCount(Integer maxCount) {
+                getState().maxFileCount = maxCount;
+        }
+
 	@Override
 	protected Html5FileInputState getState() {
 		return (Html5FileInputState) super.getState();

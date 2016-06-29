@@ -8,5 +8,6 @@ public class Html5FileInputState extends SharedState {
 	public Integer maxSize;
 	public String maxSizeText;
 	public int dummycounter;
+        public int maxFileCount;
 }
 

@@ -46,6 +46,7 @@ public class VMultiUpload extends SimplePanel
     private String maxFileSizeText;
     private String accept;
     private List<String> accepted = new ArrayList<String>();
+    private Integer maxFileCount;
 
     private final class MyFileUpload extends FileUpload {
 
@@ -284,19 +285,22 @@ public class VMultiUpload extends SimplePanel
         List<String> filedetails = new ArrayList<String>();
         List<VHtml5File> tooBigs = new ArrayList<VHtml5File>();
         List<VHtml5File> noMatches = new ArrayList<VHtml5File>();
+        List<VHtml5File> tooMany = new ArrayList<VHtml5File>();
         for (VHtml5File file : files) {
             if (maxFileSize != null && file.getSize() > maxFileSize) {
                 tooBigs.add(file);
             } else if (!AcceptUtil.accepted(file.getName(), file.getType(),
                     accepted)) {
                 noMatches.add(file);
+            } else if (maxFileCount != null && filedetails.size() >= maxFileCount) {
+                tooMany.add(file);
             } else {
                 queueFilePost(file);
                 filedetails.add(serialize(file));
             }
         }
-        if (!tooBigs.isEmpty() || !noMatches.isEmpty()) {
-            handleBouncingFiles(files, tooBigs, noMatches);
+        if (!tooBigs.isEmpty() || !noMatches.isEmpty() || !tooMany.isEmpty()) {
+            handleBouncingFiles(files, tooBigs, noMatches, tooMany);
         }
         if (!filedetails.isEmpty()) {
             client.updateVariable(paintableId, "filequeue",
@@ -308,55 +312,108 @@ public class VMultiUpload extends SimplePanel
         }
     }
 
-    private void handleBouncingFiles(VHtml5File[] files,
-            List<VHtml5File> tooBigs, List<VHtml5File> noMatches) {
+    protected void handleBouncingFiles(VHtml5File[] files,
+            List<VHtml5File> tooBigs, List<VHtml5File> noMatches,
+            List<VHtml5File> tooMany) {
+        String notificationText = null;
+        String errorText = null;
         if (!tooBigs.isEmpty()) {
             if (noMatches.isEmpty()) {
-                if (tooBigs.size() == 1) {
-                    VNotification
-                            .createNotification(1000,
-                                    client.getUIConnector().getWidget())
-                            .show("File is too big! (max " + maxFileSizeText
-                                    + ")", VNotification.CENTERED, "error");
-                    VConsole.error(
-                            "cancelled an upload because of too large file size");
-                } else {
-                    VNotification
-                            .createNotification(1000,
-                                    client.getUIConnector().getWidget())
-                            .show("Files are too big! (max " + maxFileSizeText
-                                    + ")", VNotification.CENTERED, "error");
-                    VConsole.error("cancelled " + tooBigs.size()
-                            + " uploads because of too large file size");
+                if (tooMany.isEmpty()) { // tooBigs only
+                    if (tooBigs.size() == 1) {
+                        notificationText = "File is too big! (max "
+                                + maxFileSizeText + ")";
+                        errorText = "cancelled an upload because of too large file size";
+                    } else {
+                        notificationText = "Files are too big! (max "
+                                + maxFileSizeText + ")";
+                        errorText = "cancelled " + tooBigs.size()
+                                + " uploads because of too large file size";
+                    }
+                } else { // tooBigs and tooMany
+                    if (tooMany.size() == 1) {
+                        notificationText = "Files are too big and/or there are too many of them! (max "
+                                + maxFileSizeText
+                                + ", one file over the file count limit)";
+                        errorText = "cancelled " + (tooBigs.size() + 1)
+                                + " uploads because of too large file size and/or file count exceeded";
+                    } else {
+                        notificationText = "Files are wrong type and/or there are too many of them! (max "
+                                + maxFileSizeText + ", " + tooMany.size()
+                                + " files over the file count limit)";
+                        errorText = "cancelled "
+                                + (tooBigs.size() + tooMany.size())
+                                + " uploads because of too large file size and/or file count exceeded";
+                    }
                 }
             } else {
-                VNotification
-                        .createNotification(1000,
-                                client.getUIConnector().getWidget())
-                        .show("Files are too big and/or wrong type! (max "
+                if (tooMany.isEmpty()) { // tooBigs and noMatches
+                    notificationText = "Files are too big and/or wrong type! (max "
+                            + maxFileSizeText + ", accepted: " + accept + ")";
+                    errorText = "cancelled " + tooBigs.size()
+                            + " uploads because of too large file size and/or wrong file type";
+                } else { // tooBigs, noMatches and tooMany
+                    if (tooMany.size() == 1) {
+                        notificationText = "Files are too big and/or wrong type and/or there are too many of them! (max "
                                 + maxFileSizeText + ", accepted: " + accept
-                                + ")", VNotification.CENTERED, "error");
-                VConsole.error("cancelled " + tooBigs.size()
-                        + " uploads because of too large file size and/or wrong file type");
+                                + ", one file over the file count limit)";
+                    } else {
+                        notificationText = "Files are too big and/or wrong type and/or there are too many of them! (max "
+                                + maxFileSizeText + ", accepted: " + accept
+                                + ", " + tooMany.size()
+                                + " files over the file count limit)";
+                    }
+                    errorText = "cancelled "
+                            + (tooBigs.size() + noMatches.size()
+                                    + tooMany.size())
+                            + " uploads because of too large file size and/or wrong file type and/or file count exceeded";
+                }
             }
         } else if (!noMatches.isEmpty()) {
-            if (noMatches.size() == 1) {
-                VNotification
-                        .createNotification(1000,
-                                client.getUIConnector().getWidget())
-                        .show("File is wrong type! (accepted: " + accept + ")",
-                                VNotification.CENTERED, "error");
-                VConsole.error(
-                        "cancelled an upload because of wrong file type");
-            } else {
-                VNotification
-                        .createNotification(1000,
-                                client.getUIConnector().getWidget())
-                        .show("Files are wrong type! (accepted: " + accept
-                                + ")", VNotification.CENTERED, "error");
-                VConsole.error("cancelled " + tooBigs.size()
-                        + " uploads because of wrong file types");
+            if (tooMany.isEmpty()) { // noMatches only
+                if (noMatches.size() == 1) {
+                    notificationText = "File is wrong type! (accepted: "
+                            + accept + ")";
+                    errorText = "cancelled an upload because of wrong file type";
+                } else {
+                    notificationText = "Files are wrong type! (accepted: "
+                            + accept + ")";
+                    errorText = "cancelled " + noMatches.size()
+                            + " uploads because of wrong file types";
+                }
+            } else { // noMatches and tooMany
+                if (tooMany.size() == 1) {
+                    notificationText = "Files are wrong type and/or there are too many of them! (accepted: "
+                            + accept + ", one file over the file count limit)";
+                    errorText = "cancelled " + (tooBigs.size() + 1)
+                            + " uploads because of wrong file type and/or file count exceeded";
+                } else {
+                    notificationText = "Files are wrong type and/or there are too many of them! (accepted: "
+                            + accept + ", " + tooMany.size()
+                            + " files over the file count limit)";
+                    errorText = "cancelled " + (tooBigs.size() + tooMany.size())
+                            + " uploads because of wrong file type and/or file count exceeded";
+                }
             }
+        } else if (!tooMany.isEmpty()) { // tooMany only
+            if (tooMany.size() == 1) {
+                notificationText = "There are too many files! (one file over the file count limit)";
+                errorText = "cancelled an upload because of file count exceeded";
+            } else {
+                notificationText = "There are too many files! ("
+                        + tooMany.size() + " files over the file count limit)";
+                errorText = "cancelled " + tooMany.size()
+                        + " uploads because of file count exceeded";
+            }
+        }
+        if (notificationText != null) {
+            VNotification
+                    .createNotification(1000,
+                            client.getUIConnector().getWidget())
+                    .show(notificationText, VNotification.CENTERED, "error");
+        }
+        if (errorText != null) {
+            VConsole.error(errorText);
         }
     }
 
@@ -424,6 +481,11 @@ public class VMultiUpload extends SimplePanel
         this.accept = accept;
         accepted.clear();
         accepted.addAll(AcceptUtil.unpack(accept));
+    }
+
+    @Override
+    public void setMaxFileCount(Integer maxCount) {
+        maxFileCount = maxCount;
     }
 
 }

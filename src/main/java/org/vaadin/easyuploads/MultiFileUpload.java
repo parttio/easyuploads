@@ -71,8 +71,10 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     private Map<MultiUpload, Html5FileInputSettings> html5FileInputSettings = new LinkedHashMap<MultiUpload, Html5FileInputSettings>();
 
     private int maxFileSize = -1;
+    private int maxFileCount = -1;
     private String acceptString = null;
     private List<String> acceptStrings = new ArrayList<String>();
+    private int acceptedUploads = 0;
 
     private Layout progressBars;
     protected CssLayout uploads = new CssLayout() {
@@ -137,6 +139,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 receiver.setValue(null);
                 if (upload.getPendingFileNames().isEmpty()) {
                     uploads.removeComponent(upload);
+                    html5FileInputSettings.remove(upload);
                 }
                 resetPollIntervalIfNecessary();
             }
@@ -147,6 +150,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
                 for (ProgressBar progressIndicator : indicators) {
                     getprogressBarsLayout().removeComponent(progressIndicator);
+                    --acceptedUploads;
                 }
                 resetPollIntervalIfNecessary();
             }
@@ -169,6 +173,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 if (indicators == null) {
                     indicators = new LinkedList<ProgressBar>();
                 }
+                acceptedUploads += pendingFileNames.size();
                 for (FileDetail f : pendingFileNames) {
                     ensurePushOrPollingIsEnabled();
                     ProgressBar pi = createProgressIndicator();
@@ -302,7 +307,6 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         this.areatext = areatext;
     }
 
-    @SuppressWarnings("deprecation")
     protected boolean supportsFileDrops() {
         WebBrowser browser = getUI().getPage().getWebBrowser();
         if (browser.isChrome()) {
@@ -343,6 +347,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         DragAndDropWrapper.WrapperTransferable transferable = (WrapperTransferable) event
                 .getTransferable();
         Html5File[] files = transferable.getFiles();
+        int passingCount = 0;
         for (final Html5File html5File : files) {
 
             if (maxFileSize != -1 && html5File.getFileSize() > maxFileSize) {
@@ -354,6 +359,11 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 onFileTypeMismatch();
                 continue;
             }
+            if (maxFileCount >= 0 && getRemainingFileCount() <= passingCount) {
+                onFileCountExceeded();
+                continue;
+            }
+            ++passingCount;
 
             final ProgressBar pi = createProgressIndicator();
             ensurePushOrPollingIsEnabled();
@@ -403,6 +413,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 }
             });
         }
+        acceptedUploads += passingCount;
 
     }
 
@@ -419,7 +430,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     private Html5FileInputSettings createHtml5FileInputSettingsIfNecessary(
             MultiUpload upload) {
         Html5FileInputSettings settings = null;
-        if (maxFileSize > 0 || acceptString != null) {
+        if (maxFileSize > 0 || acceptString != null || maxFileCount >= 0) {
             settings = new Html5FileInputSettings(upload);
             if (maxFileSize > 0) {
                 settings.setMaxFileSize(maxFileSize);
@@ -428,6 +439,9 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             }
             if (acceptString != null) {
                 settings.setAcceptFilter(acceptString);
+            }
+            if (maxFileCount >= 0) {
+                settings.setMaxFileCount(getRemainingFileCount());
             }
 
         }
@@ -489,6 +503,34 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             }
         }
     }
+    
+    public void setMaxFileCount(int maxFileCount) {
+        this.maxFileCount = maxFileCount;
+        int uploadCount = html5FileInputSettings.entrySet().size();
+        int processing = 0;
+        for (Entry<MultiUpload, Html5FileInputSettings> entry : html5FileInputSettings
+                .entrySet()) {
+            ++processing;
+            if (entry.getValue() == null) {
+                if (maxFileCount >= 0) {
+                    html5FileInputSettings.put(entry.getKey(),
+                            createHtml5FileInputSettingsIfNecessary(
+                                    entry.getKey()));
+                }
+            } else {
+                if (processing == uploadCount) {
+                    // only the latest upload can accept more files
+                    entry.getValue().setMaxFileCount(getRemainingFileCount());
+                } else {
+                    entry.getValue().setMaxFileCount(0);
+                }
+            }
+        }
+    }
+
+    public Integer getRemainingFileCount() {
+        return maxFileCount - acceptedUploads;
+    }
 
     public void onMaxSizeExceeded(long contentLength) {
         Notification.show(
@@ -500,6 +542,11 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
     public void onFileTypeMismatch() {
         Notification.show("File type mismatch, accepted: " + acceptString,
+                Notification.Type.ERROR_MESSAGE);
+    }
+
+    public void onFileCountExceeded() {
+        Notification.show("File count exceeded",
                 Notification.Type.ERROR_MESSAGE);
     }
 }

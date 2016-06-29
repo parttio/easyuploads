@@ -230,9 +230,10 @@ public class BasicTest extends AbstractTest {
             }
         };
         multiFileUploadLimited.setCaption(
-                "MultiFileUpload limited to < 100 000 bytes (~ 97 KB) and images");
+                "MultiFileUpload limited to < 100 000 bytes (~ 97 KB), images, and 5 files");
         multiFileUploadLimited.setMaxFileSize(100000);
         multiFileUploadLimited.setAcceptFilter("image/*");
+        multiFileUploadLimited.setMaxFileCount(5);
         mainWindow.addComponent(multiFileUploadLimited);
         mainWindow.addComponent(hr());
 

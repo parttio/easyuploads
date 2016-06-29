@@ -102,4 +102,9 @@ public class VCustomUpload extends VUpload implements HasFileUpload {
         //
     }
 
+    @Override
+    public void setMaxFileCount(Integer maxCount) {
+        // 
+    }
+
 }

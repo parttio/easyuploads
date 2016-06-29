@@ -46,6 +46,7 @@ public class Html5FileInputSettingsConnector extends AbstractExtensionConnector 
 	        HasFileUpload upload = getUpload();
 	        upload.setMaxSize(getState().maxSize);
 	        upload.setMaxSizeText(getState().maxSizeText);
+	        upload.setMaxFileCount(getState().maxFileCount);
 	        upload.setAccept(accept);
 	        getInput().setAccept(accept);
 
@@ -69,6 +70,8 @@ public class Html5FileInputSettingsConnector extends AbstractExtensionConnector 
 	        public Integer getMaxSize();
 
 	        void setMaxSizeText(String maxFileSizeText);
+
+                void setMaxFileCount(Integer maxCount);
 	}
 
 }
