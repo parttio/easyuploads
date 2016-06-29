@@ -219,6 +219,23 @@ public class BasicTest extends AbstractTest {
         mainWindow.addComponent(multiFileUpload);
         mainWindow.addComponent(hr());
 
+        MultiFileUpload multiFileUploadLimited = new MultiFileUpload() {
+            @Override
+            protected void handleFile(File file, String fileName,
+                    String mimeType, long length) {
+                String msg = fileName + " uploaded. Saved to temp file "
+                        + file.getAbsolutePath() + " (size " + length
+                        + " bytes)";
+                Notification.show(msg);
+            }
+        };
+        multiFileUploadLimited.setCaption(
+                "MultiFileUpload limited to < 100 000 bytes (~ 97 KB) and images");
+        multiFileUploadLimited.setMaxFileSize(100000);
+        multiFileUploadLimited.setAcceptFilter("image/*");
+        mainWindow.addComponent(multiFileUploadLimited);
+        mainWindow.addComponent(hr());
+
         MultiFileUpload multiFileUpload2 = new MultiFileUpload() {
             @Override
             protected void handleFile(File file, String fileName,

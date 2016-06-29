@@ -3,8 +3,12 @@ package org.vaadin.easyuploads.client.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.vaadin.easyuploads.client.AcceptUtil;
+import org.vaadin.easyuploads.client.Html5FileInputSettingsConnector.HasFileUpload;
+
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -26,6 +30,7 @@ import com.vaadin.client.VConsole;
 import com.vaadin.client.ui.VButton;
 import com.vaadin.client.ui.VCssLayout;
 import com.vaadin.client.ui.VDragAndDropWrapper;
+import com.vaadin.client.ui.VNotification;
 import com.vaadin.client.ui.dd.VHtml5File;
 
 /**
@@ -33,16 +38,21 @@ import com.vaadin.client.ui.dd.VHtml5File;
  *
  * Not finished enough for extension.
  */
-public class VMultiUpload extends SimplePanel implements Paintable {
+public class VMultiUpload extends SimplePanel
+        implements Paintable, HasFileUpload {
 
     private HandlerRegistration clikcReg;
+    private Integer maxFileSize;
+    private String maxFileSizeText;
+    private String accept;
+    private List<String> accepted = new ArrayList<String>();
 
     private final class MyFileUpload extends FileUpload {
 
-        //  Starting from Chrome 30 we should prevent the onFocus hack or
-        //  otherwise the native file dialog is opened twice.
-        private final boolean isChrome30 = (BrowserInfo.get().isChrome() && BrowserInfo
-                .get().getBrowserMajorVersion() >= 30);
+        // Starting from Chrome 30 we should prevent the onFocus hack or
+        // otherwise the native file dialog is opened twice.
+        private final boolean isChrome30 = (BrowserInfo.get().isChrome()
+                && BrowserInfo.get().getBrowserMajorVersion() >= 30);
 
         public MyFileUpload() {
             getElement().setPropertyString("multiple", "multiple");
@@ -71,17 +81,17 @@ public class VMultiUpload extends SimplePanel implements Paintable {
         }
     }
 
-	public static final native int getFileCount(Element el)
-	/*-{
-	 	return el.files.length;
-	}-*/
-	;
+    public static final native int getFileCount(Element el)
+    /*-{
+     	return el.files.length;
+    }-*/
+    ;
 
-	public static final native VHtml5File getFile(Element el, int i)
-	/*-{
-		return el.files[i];
-	}-*/
-	;
+    public static final native VHtml5File[] getFiles(Element el)
+    /*-{
+    	return el.files;
+    }-*/
+    ;
 
     public static final String CLASSNAME = "v-upload";
 
@@ -154,7 +164,8 @@ public class VMultiUpload extends SimplePanel implements Paintable {
 
         this.client = client;
         paintableId = uidl.getId();
-        receiverUri = client.translateVaadinUri(uidl.getStringVariable("target"));
+        receiverUri = client
+                .translateVaadinUri(uidl.getStringVariable("target"));
         submitButton.setText(uidl.getStringAttribute("buttoncaption"));
         fu.setName(paintableId + "_file");
 
@@ -165,17 +176,21 @@ public class VMultiUpload extends SimplePanel implements Paintable {
             enableUpload();
         }
         if (uidl.hasAttribute("ready")) {
-            VConsole.log("The server knows about coming files. Start posting files");
+            VConsole.log(
+                    "The server knows about coming files. Start posting files");
             postNextFileFromQueue();
         }
 
         Widget parent = getParent();
         if (clikcReg == null && parent instanceof VCssLayout) {
             VCssLayout vCssLayout = (VCssLayout) parent;
-            if (vCssLayout.getStyleName().contains("v-multifileupload-uploads")) {
-                VCssLayout multifileupload = (VCssLayout) vCssLayout.getParent();
+            if (vCssLayout.getStyleName()
+                    .contains("v-multifileupload-uploads")) {
+                VCssLayout multifileupload = (VCssLayout) vCssLayout
+                        .getParent();
                 for (Widget widget : multifileupload) {
-                    if (widget.getStyleName().contains("v-multifileupload-dropzone")) {
+                    if (widget.getStyleName()
+                            .contains("v-multifileupload-dropzone")) {
                         final VDragAndDropWrapper ddw = (VDragAndDropWrapper) widget;
                         clikcReg = ddw.addDomHandler(new ClickHandler() {
                             @Override
@@ -194,8 +209,8 @@ public class VMultiUpload extends SimplePanel implements Paintable {
     private void postNextFileFromQueue() {
         if (!fileQueue.isEmpty()) {
             final VHtml5File file = fileQueue.remove(0);
-            VConsole.log("Posting file " + file.getName() + " to "
-                    + receiverUri);
+            VConsole.log(
+                    "Posting file " + file.getName() + " to " + receiverUri);
             ExtendedXHR extendedXHR = (ExtendedXHR) ExtendedXHR.create();
             extendedXHR.setOnReadyStateChange(readyStateChangeHandler);
             extendedXHR.open("POST", receiverUri);
@@ -216,24 +231,24 @@ public class VMultiUpload extends SimplePanel implements Paintable {
         protected ExtendedXHR() {
         }
 
-		public final native void postFile(VHtml5File file)
-		/*-{
-		    this.setRequestHeader('Accept', 'text/html,vaadin/filexhr');
-		    this.setRequestHeader('Content-Type', 'multipart/form-data');
-		    this.send(file);
-		}-*/;
+        public final native void postFile(VHtml5File file)
+        /*-{
+            this.setRequestHeader('Accept', 'text/html,vaadin/filexhr');
+            this.setRequestHeader('Content-Type', 'multipart/form-data');
+            this.send(file);
+        }-*/;
 
     }
 
-	private static native void fireNativeClick(Element element)
-	/*-{
-	    element.click();
-	}-*/;
+    private static native void fireNativeClick(Element element)
+    /*-{
+        element.click();
+    }-*/;
 
-	private static native void fireNativeBlur(Element element)
-	/*-{
-	    element.blur();
-	}-*/;
+    private static native void fireNativeBlur(Element element)
+    /*-{
+        element.blur();
+    }-*/;
 
     protected void disableUpload() {
         submitButton.setEnabled(false);
@@ -265,16 +280,84 @@ public class VMultiUpload extends SimplePanel implements Paintable {
     }
 
     private void submit() {
-        int files = getFileCount(fu.getElement());
-        String[] filedetails = new String[files];
-        for (int i = 0; i < files; i++) {
-            VHtml5File file = getFile(fu.getElement(), i);
-            queueFilePost(file);
-            filedetails[i] = serialize(file);
+        VHtml5File[] files = getFiles(fu.getElement());
+        List<String> filedetails = new ArrayList<String>();
+        List<VHtml5File> tooBigs = new ArrayList<VHtml5File>();
+        List<VHtml5File> noMatches = new ArrayList<VHtml5File>();
+        for (VHtml5File file : files) {
+            if (maxFileSize != null && file.getSize() > maxFileSize) {
+                tooBigs.add(file);
+            } else if (!AcceptUtil.accepted(file.getName(), file.getType(),
+                    accepted)) {
+                noMatches.add(file);
+            } else {
+                queueFilePost(file);
+                filedetails.add(serialize(file));
+            }
         }
-        client.updateVariable(paintableId, "filequeue", filedetails, true);
+        if (!tooBigs.isEmpty() || !noMatches.isEmpty()) {
+            handleBouncingFiles(files, tooBigs, noMatches);
+        }
+        if (!filedetails.isEmpty()) {
+            client.updateVariable(paintableId, "filequeue",
+                    filedetails.toArray(new String[filedetails.size()]), true);
 
-        disableUpload();
+            disableUpload();
+        } else {
+            ((InputElement) fu.getElement().cast()).setValue(null);
+        }
+    }
+
+    private void handleBouncingFiles(VHtml5File[] files,
+            List<VHtml5File> tooBigs, List<VHtml5File> noMatches) {
+        if (!tooBigs.isEmpty()) {
+            if (noMatches.isEmpty()) {
+                if (tooBigs.size() == 1) {
+                    VNotification
+                            .createNotification(1000,
+                                    client.getUIConnector().getWidget())
+                            .show("File is too big! (max " + maxFileSizeText
+                                    + ")", VNotification.CENTERED, "error");
+                    VConsole.error(
+                            "cancelled an upload because of too large file size");
+                } else {
+                    VNotification
+                            .createNotification(1000,
+                                    client.getUIConnector().getWidget())
+                            .show("Files are too big! (max " + maxFileSizeText
+                                    + ")", VNotification.CENTERED, "error");
+                    VConsole.error("cancelled " + tooBigs.size()
+                            + " uploads because of too large file size");
+                }
+            } else {
+                VNotification
+                        .createNotification(1000,
+                                client.getUIConnector().getWidget())
+                        .show("Files are too big and/or wrong type! (max "
+                                + maxFileSizeText + ", accepted: " + accept
+                                + ")", VNotification.CENTERED, "error");
+                VConsole.error("cancelled " + tooBigs.size()
+                        + " uploads because of too large file size and/or wrong file type");
+            }
+        } else if (!noMatches.isEmpty()) {
+            if (noMatches.size() == 1) {
+                VNotification
+                        .createNotification(1000,
+                                client.getUIConnector().getWidget())
+                        .show("File is wrong type! (accepted: " + accept + ")",
+                                VNotification.CENTERED, "error");
+                VConsole.error(
+                        "cancelled an upload because of wrong file type");
+            } else {
+                VNotification
+                        .createNotification(1000,
+                                client.getUIConnector().getWidget())
+                        .show("Files are wrong type! (accepted: " + accept
+                                + ")", VNotification.CENTERED, "error");
+                VConsole.error("cancelled " + tooBigs.size()
+                        + " uploads because of wrong file types");
+            }
+        }
     }
 
     /**
@@ -314,6 +397,33 @@ public class VMultiUpload extends SimplePanel implements Paintable {
             clikcReg.removeHandler();
             clikcReg = null;
         }
+    }
+
+    @Override
+    public FileUpload getFileUpload() {
+        return fu;
+    }
+
+    @Override
+    public Integer getMaxSize() {
+        return maxFileSize;
+    }
+
+    @Override
+    public void setMaxSize(Integer maxFileSize) {
+        this.maxFileSize = maxFileSize;
+    }
+
+    @Override
+    public void setMaxSizeText(String maxFileSizeText) {
+        this.maxFileSizeText = maxFileSizeText;
+    }
+
+    @Override
+    public void setAccept(String accept) {
+        this.accept = accept;
+        accepted.clear();
+        accepted.addAll(AcceptUtil.unpack(accept));
     }
 
 }

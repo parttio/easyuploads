@@ -19,6 +19,17 @@ public class Html5FileInputSettings extends AbstractExtension {
 		});
 	}
 
+	public Html5FileInputSettings(MultiUpload tf) {
+	    extend(tf);
+	    tf.addFinishedListener(
+	            new org.vaadin.easyuploads.MultiUpload.FinishedListener() {
+	                @Override
+	                public void uploadFinished() {
+	                    getState().dummycounter++;
+	                }
+	            });
+	}
+
 	@Override
 	public void beforeClientResponse(boolean initial) {
 		super.beforeClientResponse(initial);
@@ -54,5 +65,9 @@ public class Html5FileInputSettings extends AbstractExtension {
 	protected Html5FileInputState getState() {
 		return (Html5FileInputState) super.getState();
 	}
+
+        public void setMaxFileSizeText(String maxSizeText) {
+            getState().maxSizeText = maxSizeText;
+        }
 
 }

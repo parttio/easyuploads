@@ -2,27 +2,31 @@ package org.vaadin.easyuploads;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.vaadin.easyuploads.MultiUpload.FileDetail;
 import org.vaadin.easyuploads.UploadField.FieldType;
+import org.vaadin.easyuploads.client.AcceptUtil;
 
 import com.vaadin.event.dd.DragAndDropEvent;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptAll;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.StreamVariable;
 import com.vaadin.server.StreamVariable.StreamingEndEvent;
 import com.vaadin.server.StreamVariable.StreamingErrorEvent;
 import com.vaadin.server.StreamVariable.StreamingProgressEvent;
 import com.vaadin.server.StreamVariable.StreamingStartEvent;
-import com.vaadin.server.UploadException;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.ui.Component;
@@ -64,7 +68,11 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
+    private Map<MultiUpload, Html5FileInputSettings> html5FileInputSettings = new LinkedHashMap<MultiUpload, Html5FileInputSettings>();
+
     private int maxFileSize = -1;
+    private String acceptString = null;
+    private List<String> acceptStrings = new ArrayList<String>();
 
     private Layout progressBars;
     protected CssLayout uploads = new CssLayout() {
@@ -107,20 +115,21 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         final FileBuffer receiver = createReceiver();
 
         final MultiUpload upload = new MultiUpload();
+        getHtml5FileInputSettings(upload);
         MultiUploadHandler handler = new MultiUploadHandler() {
             private LinkedList<ProgressBar> indicators;
 
             public void streamingStarted(StreamingStartEvent event) {
                 if (maxFileSize > 0 && event.getContentLength() > maxFileSize) {
-                    throw new MaxFileSizeExceededException(event.
-                            getContentLength(), maxFileSize);
+                    throw new MaxFileSizeExceededException(
+                            event.getContentLength(), maxFileSize);
                 }
             }
 
             public void streamingFinished(StreamingEndEvent event) {
                 if (!indicators.isEmpty()) {
-                    getprogressBarsLayout().
-                            removeComponent(indicators.remove(0));
+                    getprogressBarsLayout()
+                            .removeComponent(indicators.remove(0));
                 }
                 File file = receiver.getFile();
                 handleFile(file, event.getFileName(), event.getMimeType(),
@@ -315,12 +324,12 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
      * A helper method to set DirectoryFileFactory with given pathname as
      * directory.
      *
-     * @param directoryWhereToUpload the path to directory where files should be
-     * uploaded
+     * @param directoryWhereToUpload
+     *            the path to directory where files should be uploaded
      */
     public void setRootDirectory(String directoryWhereToUpload) {
-        setFileFactory(new DirectoryFileFactory(
-                new File(directoryWhereToUpload)));
+        setFileFactory(
+                new DirectoryFileFactory(new File(directoryWhereToUpload)));
     }
 
     public AcceptCriterion getAcceptCriterion() {
@@ -331,13 +340,18 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     }
 
     public void drop(DragAndDropEvent event) {
-        DragAndDropWrapper.WrapperTransferable transferable = (WrapperTransferable) event.
-                getTransferable();
+        DragAndDropWrapper.WrapperTransferable transferable = (WrapperTransferable) event
+                .getTransferable();
         Html5File[] files = transferable.getFiles();
         for (final Html5File html5File : files) {
 
             if (maxFileSize != -1 && html5File.getFileSize() > maxFileSize) {
                 onMaxSizeExceeded(html5File.getFileSize());
+                continue;
+            }
+            if (!AcceptUtil.accepted(html5File.getFileName(),
+                    html5File.getType(), acceptStrings)) {
+                onFileTypeMismatch();
                 continue;
             }
 
@@ -392,41 +406,100 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
     }
 
+    private Html5FileInputSettings getHtml5FileInputSettings(
+            MultiUpload upload) {
+        if (!html5FileInputSettings.containsKey(upload)) {
+            Html5FileInputSettings settings = createHtml5FileInputSettingsIfNecessary(
+                    upload);
+            html5FileInputSettings.put(upload, settings);
+        }
+        return html5FileInputSettings.get(upload);
+    }
+
+    private Html5FileInputSettings createHtml5FileInputSettingsIfNecessary(
+            MultiUpload upload) {
+        Html5FileInputSettings settings = null;
+        if (maxFileSize > 0 || acceptString != null) {
+            settings = new Html5FileInputSettings(upload);
+            if (maxFileSize > 0) {
+                settings.setMaxFileSize(maxFileSize);
+                settings.setMaxFileSizeText(
+                        FileUtils.byteCountToDisplaySize(maxFileSize));
+            }
+            if (acceptString != null) {
+                settings.setAcceptFilter(acceptString);
+            }
+
+        }
+        return settings;
+    }
+
+    public String getAcceptFilter() {
+        return acceptString;
+    }
+
+    /**
+     * @see {@link Html5FileInputSettings#setAcceptFilter(String)}
+     * @param acceptString
+     */
+    public void setAcceptFilter(String acceptString) {
+        this.acceptString = acceptString;
+        acceptStrings.clear();
+        acceptStrings.addAll(AcceptUtil.unpack(acceptString));
+        for (Entry<MultiUpload, Html5FileInputSettings> entry : html5FileInputSettings
+                .entrySet()) {
+            if (entry.getValue() == null) {
+                if (acceptString != null) {
+                    html5FileInputSettings.put(entry.getKey(),
+                            createHtml5FileInputSettingsIfNecessary(
+                                    entry.getKey()));
+                }
+            } else {
+                entry.getValue().setAcceptFilter(acceptString);
+            }
+        }
+    }
+
     public int getMaxFileSize() {
         return maxFileSize;
     }
 
+    /**
+     * @see {@link Html5FileInputSettings#setMaxFileSize(Integer)}
+     * @param maxFileSize
+     */
     public void setMaxFileSize(int maxFileSize) {
         this.maxFileSize = maxFileSize;
-        if (maxFileSize > 0) {
-            // TODO figure out if this could be done somehow else, now this 
-            // might override the error hanler set by user, maybe set for 
-            // individual multiuploads instead ??
-            setErrorHandler(new DefaultErrorHandler() {
-                @Override
-                public void error(com.vaadin.server.ErrorEvent event) {
-                    if (event.getThrowable() != null && event.getThrowable() instanceof UploadException) {
-                        Throwable cause = event.getThrowable().getCause();
-                        if (cause != null && cause instanceof MaxFileSizeExceededException) {
-                            onMaxSizeExceeded(
-                                    ((MaxFileSizeExceededException) cause).
-                                    getContentLength());
-                            return;
-                        }
-                    }
-                    super.error(event);
+        for (Entry<MultiUpload, Html5FileInputSettings> entry : html5FileInputSettings
+                .entrySet()) {
+            if (entry.getValue() == null) {
+                if (maxFileSize > 0) {
+                    html5FileInputSettings.put(entry.getKey(),
+                            createHtml5FileInputSettingsIfNecessary(
+                                    entry.getKey()));
                 }
-            });
-        } else {
-            setErrorHandler(null);
+            } else {
+                entry.getValue().setMaxFileSize(maxFileSize);
+                if (maxFileSize > 0) {
+                    entry.getValue().setMaxFileSizeText(
+                            FileUtils.byteCountToDisplaySize(maxFileSize));
+                } else {
+                    entry.getValue().setMaxFileSizeText("not set");
+                }
+            }
         }
     }
 
     public void onMaxSizeExceeded(long contentLength) {
         Notification.show(
-                "Max size exceeded " + FileUtils.byteCountToDisplaySize(
-                        contentLength) + " > "
-                + FileUtils.byteCountToDisplaySize(maxFileSize),
+                "Max size exceeded "
+                        + FileUtils.byteCountToDisplaySize(contentLength)
+                        + " > " + FileUtils.byteCountToDisplaySize(maxFileSize),
+                Notification.Type.ERROR_MESSAGE);
+    }
+
+    public void onFileTypeMismatch() {
+        Notification.show("File type mismatch, accepted: " + acceptString,
                 Notification.Type.ERROR_MESSAGE);
     }
 }

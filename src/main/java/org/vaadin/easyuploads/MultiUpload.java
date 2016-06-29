@@ -21,7 +21,9 @@ import com.vaadin.ui.LegacyComponent;
 public class MultiUpload extends AbstractComponent implements LegacyComponent {
 
 	List<FileDetail> pendingFiles = new ArrayList<FileDetail>();
+        List<FinishedListener> finishedListeners = new ArrayList<FinishedListener>();
 
+        private String buttonCaption = "...";
 	private MultiUploadHandler receiver;
 
 	StreamVariable streamVariable = new StreamVariable() {
@@ -75,8 +77,11 @@ public class MultiUpload extends AbstractComponent implements LegacyComponent {
 					return event.getBytesReceived();
 				}
 
-			});
-		}
+                        });
+                        for (FinishedListener finishedListener : finishedListeners) {
+                            finishedListener.uploadFinished();
+                        }
+                }
 
 		public void streamingFailed(StreamingErrorEvent event) {
 			receiver.streamingFailed(event);
@@ -172,6 +177,14 @@ public class MultiUpload extends AbstractComponent implements LegacyComponent {
 		}
 	}
 
-	private String buttonCaption = "...";
+        public void addFinishedListener(FinishedListener finishedListener) {
+            if (!finishedListeners.contains(finishedListener)) {
+                finishedListeners.add(finishedListener);
+            }
+        }
+
+        public interface FinishedListener {
+            void uploadFinished();
+        }
 
 }

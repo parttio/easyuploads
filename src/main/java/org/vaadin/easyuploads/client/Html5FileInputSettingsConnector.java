@@ -1,10 +1,10 @@
 package org.vaadin.easyuploads.client;
 
 import org.vaadin.easyuploads.Html5FileInputSettings;
-import org.vaadin.easyuploads.client.ui.VCustomUpload;
 
 import com.google.gwt.dom.client.InputElement;
-import com.google.gwt.dom.client.Node;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.VConsole;
 import com.vaadin.client.communication.StateChangeEvent;
@@ -18,17 +18,17 @@ public class Html5FileInputSettingsConnector extends AbstractExtensionConnector 
 	private InputElement input;
 
 	private InputElement getInput() {
-		final VCustomUpload widget = getUpload();
-		if (input == null || !widget.getElement().isOrHasChild((Node) input)) {
+		final HasFileUpload widget = getUpload();
+		if (input == null || !((Widget) widget).getElement().isOrHasChild(input)) {
 			VConsole.error("Registering " + (input == null));
-			input = (InputElement) widget.fu.getElement().cast();
+			input = (InputElement) widget.getFileUpload().getElement().cast();
 		}
 		return input;
 	}
 
-	private VCustomUpload getUpload() {
+	private HasFileUpload getUpload() {
 		AbstractComponentConnector parent3 = (AbstractComponentConnector) getParent();
-		final VCustomUpload widget = (VCustomUpload) parent3.getWidget();
+		HasFileUpload widget = (HasFileUpload) parent3.getWidget();
 		return widget;
 	}
 
@@ -43,14 +43,32 @@ public class Html5FileInputSettingsConnector extends AbstractExtensionConnector 
 
 		VConsole.error("statechange");
 		String accept = getState().accept;
-		getUpload().setMaxSize(getState().maxSize);
-		getInput().setAccept(accept);
+	        HasFileUpload upload = getUpload();
+	        upload.setMaxSize(getState().maxSize);
+	        upload.setMaxSizeText(getState().maxSizeText);
+	        upload.setAccept(accept);
+	        getInput().setAccept(accept);
 
 	}
 
 	@Override
 	public Html5FileInputState getState() {
 		return (Html5FileInputState) super.getState();
+	}
+
+	public interface HasFileUpload {
+	        public FileUpload getFileUpload();
+
+	        /**
+	         * @see {@link InputElement#setAccept(String)}</a>
+	         */
+	        public void setAccept(String accept);
+
+	        public void setMaxSize(Integer maxSize);
+
+	        public Integer getMaxSize();
+
+	        void setMaxSizeText(String maxFileSizeText);
 	}
 
 }

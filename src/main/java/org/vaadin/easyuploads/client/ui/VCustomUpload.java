@@ -1,17 +1,20 @@
 package org.vaadin.easyuploads.client.ui;
 
+import org.vaadin.easyuploads.client.Html5FileInputSettingsConnector.HasFileUpload;
+
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.FileUpload;
 import com.vaadin.client.VConsole;
 import com.vaadin.client.ui.VNotification;
 import com.vaadin.client.ui.VUpload;
 import com.vaadin.client.ui.dd.VHtml5File;
 
-
-public class VCustomUpload extends VUpload {
+public class VCustomUpload extends VUpload implements HasFileUpload {
 
 	private Integer maxSize;
+	private String maxSizeText;
 
 	@Override
 	public void submit() {
@@ -76,8 +79,27 @@ public class VCustomUpload extends VUpload {
 	return true;
 	}-*/;
 
-	public void setMaxSize(Integer maxSize) {
-		this.maxSize = maxSize;
-	}
+    public Integer getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(Integer maxSize) {
+        this.maxSize = maxSize;
+    }
+
+    @Override
+    public FileUpload getFileUpload() {
+        return fu;
+    }
+
+    @Override
+    public void setMaxSizeText(String maxSizeText) {
+        this.maxSizeText = maxSizeText;
+    }
+
+    @Override
+    public void setAccept(String accept) {
+        //
+    }
 
 }
