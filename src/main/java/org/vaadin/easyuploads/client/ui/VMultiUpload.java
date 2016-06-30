@@ -350,7 +350,7 @@ public class VMultiUpload extends SimplePanel
                 if (tooMany.isEmpty()) { // tooBigs and noMatches
                     notificationText = "Files are too big and/or wrong type! (max "
                             + maxFileSizeText + ", accepted: " + accept + ")";
-                    errorText = "cancelled " + tooBigs.size()
+                    errorText = "cancelled " + (tooBigs.size() + noMatches.size())
                             + " uploads because of too large file size and/or wrong file type";
                 } else { // tooBigs, noMatches and tooMany
                     if (tooMany.size() == 1) {
