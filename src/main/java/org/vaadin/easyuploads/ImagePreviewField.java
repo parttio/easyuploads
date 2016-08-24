@@ -36,6 +36,7 @@ public class ImagePreviewField extends UploadField {
     public ImagePreviewField() {
         setAcceptFilter("image/*");
         setFieldType(FieldType.BYTE_ARRAY);
+        setStorageMode(StorageMode.MEMORY);
     }
 
     @Override
