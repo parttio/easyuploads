@@ -1050,6 +1050,8 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         try {
             if (dataSource != null) {
                 receiver.setValue(dataSource.getValue());
+            } else {
+                receiver.setValue(null);
             }
             modified = false;
         } catch (final Throwable e) {
