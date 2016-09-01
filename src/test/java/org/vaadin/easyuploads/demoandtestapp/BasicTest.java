@@ -34,15 +34,15 @@ import com.vaadin.ui.VerticalLayout;
 
 @Theme("valo")
 public class BasicTest extends AbstractTest {
-
-	@SuppressWarnings("serial")
+    
+    @SuppressWarnings("serial")
     @Override
-	public Component getTestComponent() {
-		VerticalLayout mainWindow = new VerticalLayout();
+    public Component getTestComponent() {
+        VerticalLayout mainWindow = new VerticalLayout();
         final UploadField uploadField = new UploadField();
         uploadField.setCaption("Default mode: temp files, fieldType:"
                 + uploadField.getFieldType());
-
+        
         Button b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
@@ -53,12 +53,12 @@ public class BasicTest extends AbstractTest {
         mainWindow.addComponent(uploadField);
         mainWindow.addComponent(b);
         mainWindow.addComponent(hr());
-
+        
         final UploadField uploadField2 = new UploadField();
         uploadField2.setFieldType(FieldType.FILE);
         uploadField2.setCaption("Storagemode: temp files, fieldType:"
                 + uploadField2.getFieldType());
-
+        
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
@@ -69,13 +69,13 @@ public class BasicTest extends AbstractTest {
         mainWindow.addComponent(uploadField2);
         mainWindow.addComponent(b);
         mainWindow.addComponent(hr());
-
+        
         final UploadField uploadField3 = new UploadField();
         uploadField3.setFieldType(FieldType.FILE);
         final File tempDir = Files.createTempDir();
-        uploadField3.setCaption("Storagemode: "+tempDir +" , fieldType:"
+        uploadField3.setCaption("Storagemode: " + tempDir + " , fieldType:"
                 + uploadField3.getFieldType());
-
+        
         uploadField3.setFileFactory(new FileFactory() {
             public File createFile(String fileName, String mimeType) {
                 File f = new File(tempDir, fileName);
@@ -85,19 +85,18 @@ public class BasicTest extends AbstractTest {
         
         final UploadField uploadFieldHtml5Configured = new UploadField();
         uploadFieldHtml5Configured.setFieldType(FieldType.FILE);
-        uploadFieldHtml5Configured.setCaption("Storagemode: "+tempDir +" , fieldType:"
+        uploadFieldHtml5Configured.setCaption("Storagemode: " + tempDir + " , fieldType:"
                 + uploadFieldHtml5Configured.getFieldType() + " just images, max 1000000");
         uploadFieldHtml5Configured.setAcceptFilter("image/*");
         uploadFieldHtml5Configured.setMaxFileSize(1000000);
-
+        
         uploadFieldHtml5Configured.setFileFactory(new FileFactory() {
             public File createFile(String fileName, String mimeType) {
                 File f = new File(tempDir, fileName);
                 return f;
             }
         });
-
-
+        
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
@@ -108,23 +107,23 @@ public class BasicTest extends AbstractTest {
         mainWindow.addComponent(uploadFieldHtml5Configured);
         mainWindow.addComponent(b);
         mainWindow.addComponent(hr());
-
+        
         final UploadField uploadField4 = new UploadField();
         uploadField4.setStorageMode(StorageMode.MEMORY);
         uploadField4.setFieldType(FieldType.UTF8_STRING);
         uploadField4
                 .setCaption("writethrough=false, Storagemode: memory , fieldType:"
                         + uploadField4.getFieldType());
-
+        
         uploadField4.setPropertyDataSource(new ObjectProperty<String>(
                 "propertyvalue"));
         uploadField4.setWriteThrough(false);
         mainWindow.addComponent(uploadField4);
         uploadField4.addListener(new ValueChangeListener() {
-           @Override
-           public void valueChange(ValueChangeEvent event) {
-              Notification.show("ValueChangeEvent fired.");
-              }
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                Notification.show("ValueChangeEvent fired.");
+            }
         });
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
@@ -144,12 +143,24 @@ public class BasicTest extends AbstractTest {
         });
         mainWindow.addComponent(b);
         mainWindow.addComponent(hr());
-
+        
         final UploadField uploadField5 = new UploadField();
         uploadField5.setFieldType(FieldType.BYTE_ARRAY);
         uploadField5.setCaption("Storagemode: memory , fieldType:"
                 + uploadField5.getFieldType());
-
+        
+        uploadField5.addValueChangeListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                
+                String lastFileName = uploadField5.getLastFileName();
+                String lastMimeType = uploadField5.getLastMimeType();
+                
+                Notification.show(lastFileName +  " " + lastMimeType);
+                
+            }
+        });
+        
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
@@ -160,7 +171,7 @@ public class BasicTest extends AbstractTest {
         mainWindow.addComponent(uploadField5);
         mainWindow.addComponent(b);
         mainWindow.addComponent(hr());
-
+        
         final UploadField uploadField6 = new UploadField() {
             @Override
             protected void updateDisplay() {
@@ -171,10 +182,10 @@ public class BasicTest extends AbstractTest {
                 if (mimeType.equals("image/png")) {
                     Resource resource = new StreamResource(
                             new StreamResource.StreamSource() {
-                                public InputStream getStream() {
-                                    return new ByteArrayInputStream(pngData);
-                                }
-                            }, "") {
+                        public InputStream getStream() {
+                            return new ByteArrayInputStream(pngData);
+                        }
+                    }, "") {
                         @Override
                         public String getMIMEType() {
                             return "image/png";
@@ -193,7 +204,7 @@ public class BasicTest extends AbstractTest {
                 .setCaption("Storagemode: memory , fieldType:"
                         + uploadField6.getFieldType()
                         + ", overridden methods to display possibly loaded PNG in preview.");
-
+        
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
             public void buttonClick(ClickEvent event) {
@@ -204,7 +215,7 @@ public class BasicTest extends AbstractTest {
         mainWindow.addComponent(uploadField6);
         mainWindow.addComponent(b);
         mainWindow.addComponent(hr());
-
+        
         MultiFileUpload multiFileUpload = new MultiFileUpload() {
             @Override
             protected void handleFile(File file, String fileName,
@@ -218,7 +229,7 @@ public class BasicTest extends AbstractTest {
         multiFileUpload.setCaption("MultiFileUpload");
         mainWindow.addComponent(multiFileUpload);
         mainWindow.addComponent(hr());
-
+        
         MultiFileUpload multiFileUploadLimited = new MultiFileUpload() {
             @Override
             protected void handleFile(File file, String fileName,
@@ -236,7 +247,7 @@ public class BasicTest extends AbstractTest {
         multiFileUploadLimited.setMaxFileCount(5);
         mainWindow.addComponent(multiFileUploadLimited);
         mainWindow.addComponent(hr());
-
+        
         MultiFileUpload multiFileUpload2 = new MultiFileUpload() {
             @Override
             protected void handleFile(File file, String fileName,
@@ -244,10 +255,10 @@ public class BasicTest extends AbstractTest {
                 String msg = fileName + " uploaded. Saved to file "
                         + file.getAbsolutePath() + " (size " + length
                         + " bytes)";
-
+                
                 Notification.show(msg);
             }
-
+            
             @Override
             protected FileBuffer createReceiver() {
                 FileBuffer receiver = super.createReceiver();
@@ -262,7 +273,7 @@ public class BasicTest extends AbstractTest {
         multiFileUpload2.setCaption("MultiFileUpload (with root dir)");
         multiFileUpload2.setRootDirectory(Files.createTempDir().toString());
         mainWindow.addComponent(multiFileUpload2);
-
+        
         mainWindow.addComponent(hr());
         MultiFileUpload multiFileUpload3 = new SlowMultiFileUpload();
         multiFileUpload3.setCaption("MultiFileUpload (simulated slow network)");
@@ -286,7 +297,7 @@ public class BasicTest extends AbstractTest {
             }
         };
         maxSizeField.addValueChangeListener(new ValueChangeListener() {
-
+            
             @Override
             public void valueChange(ValueChangeEvent event) {
                 if (maxSizeField.getValue() != null) {
@@ -300,24 +311,25 @@ public class BasicTest extends AbstractTest {
         
         maxSizeMultiUploadLayout.addComponent(multiFileUploadWithMaxSize);
         mainWindow.addComponent(hr());
-
+        
         return mainWindow;
     }
-
+    
     @Override
     protected void setup() {
         super.setup();
         content.setSizeUndefined();
     }
-
+    
     class SlowMultiFileUpload extends MultiFileUpload {
+
         @Override
         protected void handleFile(File file, String fileName, String mimeType,
                 long length) {
             String msg = fileName + " uploaded.";
             Notification.show(msg);
         }
-
+        
         @Override
         protected FileBuffer createReceiver() {
             return new FileBuffer() {
@@ -325,7 +337,7 @@ public class BasicTest extends AbstractTest {
                 public FileFactory getFileFactory() {
                     return SlowMultiFileUpload.this.getFileFactory();
                 }
-
+                
                 @Override
                 public OutputStream receiveUpload(String filename,
                         String MIMEType) {
@@ -334,7 +346,7 @@ public class BasicTest extends AbstractTest {
                     OutputStream slow = new OutputStream() {
                         private int slept;
                         private int written;
-
+                        
                         @Override
                         public void write(int b) throws IOException {
                             receiveUpload.write(b);
@@ -354,14 +366,24 @@ public class BasicTest extends AbstractTest {
                     return slow;
                 }
 
+                @Override
+                public void setLastMimeType(String mimeType) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                public void setLastFileName(String fileName) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+                
             };
         }
-
+        
     }
-
+    
     private Component hr() {
         Label label = new Label("<hr>", Label.CONTENT_XHTML);
         return label;
     }
-
+    
 }

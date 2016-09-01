@@ -16,6 +16,10 @@ interface UploadFieldReceiver extends Receiver {
 	long getLastFileSize();
 
 	String getLastMimeType();
+        
+        void setLastMimeType(String mimeType);
 
 	String getLastFileName();
+        
+        void setLastFileName(String fileName);
 }

@@ -141,6 +141,16 @@ public class UploadField extends CssLayout implements Field, StartedListener,
                     public FieldType getFieldType() {
                         return UploadField.this.getFieldType();
                     };
+
+                @Override
+                public void setLastMimeType(String mimeType) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+
+                @Override
+                public void setLastFileName(String fileName) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
                 };
                 break;
             }
@@ -155,6 +165,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     @Override
     public void clear() {
         receiver.setValue(null);
+    }
+
+    public void setLastMimeType(String mimeType) {
     }
 
     public enum StorageMode {
@@ -276,16 +289,32 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             return outputBuffer == null || outputBuffer.size() == 0;
         }
 
+        @Override
         public long getLastFileSize() {
             return outputBuffer.size();
         }
 
+        @Override
         public String getLastMimeType() {
             return mimeType;
         }
 
+        @Override
         public String getLastFileName() {
             return fileName;
+        }
+
+        public void setFileName(String fileName) {
+        }
+
+        @Override
+        public void setLastMimeType(String mimeType) {
+            this.mimeType = mimeType;
+        }
+
+        @Override
+        public void setLastFileName(String fileName) {
+            this.fileName = fileName;
         }
 
     }
@@ -1088,7 +1117,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         return receiver.getLastFileSize();
     }
 
-    protected String getLastMimeType() {
+    public String getLastMimeType() {
         return receiver.getLastMimeType();
     }
 

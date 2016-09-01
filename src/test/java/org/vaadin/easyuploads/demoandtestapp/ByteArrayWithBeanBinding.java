@@ -6,21 +6,21 @@ import org.vaadin.easyuploads.*;
 import org.vaadin.easyuploads.UploadField.FieldType;
 import org.vaadin.easyuploads.UploadField.StorageMode;
 
-import com.google.common.io.*;
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.*;
-import com.vaadin.server.*;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import org.vaadin.addonhelpers.AbstractTest;
+import org.vaadin.viritin.layouts.MVerticalLayout;
 
 @Theme("valo")
 public class ByteArrayWithBeanBinding extends AbstractTest {
 
-    public static class Entity {
+    private BeanFieldGroup<BeanWithFileEntity> bfg;
+
+    public static class FileEntity {
 
         byte[] value;
 
@@ -32,17 +32,70 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
             this.value = value;
         }
 
+        String mimeType;
+
+        public String getMimeType() {
+            return mimeType;
+        }
+
+        public void setMimeType(String mimeType) {
+            this.mimeType = mimeType;
+        }
+
+        @Override
+        public String toString() {
+            String string;
+            if (value == null) {
+                string = "null";
+            } else {
+                string = new String(value);
+                if (string.length() > 100) {
+                    string = string.substring(0, 100);
+                }
+
+            }
+            return "FileEntity{" + "value=" + string + ", mimeType=" + mimeType + '}';
+        }
+
+    }
+
+    public static class BeanWithFileEntity {
+
+        private FileEntity fileEntity = new FileEntity();
+
+        public FileEntity getFileEntity() {
+            return fileEntity;
+        }
+
+        public void setFileEntity(FileEntity fileEntity) {
+            this.fileEntity = fileEntity;
+        }
+
+        @Override
+        public String toString() {
+            return "BeanWithFileEntity{" + "fileEntity=" + fileEntity + '}';
+        }
+
     }
 
     UploadField value = new UploadField(StorageMode.MEMORY);
+
+    CustomFieldEditingBothMimeAndContent fileEntity = new CustomFieldEditingBothMimeAndContent();
 
     @Override
     public Component getTestComponent() {
 
         value.setFieldType(FieldType.BYTE_ARRAY);
 
-        final Entity entity = new Entity();
-        
+        final FileEntity entity = new FileEntity();
+
+        value.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                Notification.show("You could change stuff here as well, mimetype:" + value.getLastMimeType());
+            }
+        });
+
         entity.setValue("Foobar".getBytes());
 
         BeanFieldGroup.bindFieldsUnbuffered(entity, this);
@@ -52,19 +105,38 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
 
             @Override
             public void buttonClick(ClickEvent event) {
-                if (entity.getValue() == null) {
-                    Notification.show("NULL");
-                } else {
-                    String string = new String(entity.getValue());
-                    if (string.length() > 100) {
-                        string = string.substring(0, 100);
-                    }
-                    Notification.show(string);
-                }
+                Notification.show(entity.toString());
             }
         });
 
-        return new VerticalLayout(value, b);
+        fileEntity.setCaption("Nested class editor example");
+
+        final BeanWithFileEntity beanWithFileEntity = new BeanWithFileEntity();
+
+        bfg = BeanFieldGroup.bindFieldsUnbuffered(beanWithFileEntity, this);
+
+        Button showValue = new Button("Show entity value");
+        showValue.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                Notification.show(beanWithFileEntity.toString());
+            }
+        });
+
+        Button rebind = new Button("Bind with value");
+        rebind.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                
+                FileEntity fe = new FileEntity();
+                fe.setValue("Simple text example".getBytes());
+                fe.setMimeType("text/plain");
+                beanWithFileEntity.setFileEntity(fe);
+                BeanFieldGroup.bindFieldsUnbuffered(beanWithFileEntity, ByteArrayWithBeanBinding.this);
+            }
+        });
+
+        return new MVerticalLayout(value, b, fileEntity, showValue, rebind);
     }
 
     @Override
@@ -73,59 +145,55 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
         content.setSizeUndefined();
     }
 
-    class SlowMultiFileUpload extends MultiFileUpload {
-
-        @Override
-        protected void handleFile(File file, String fileName, String mimeType,
-                long length) {
-            String msg = fileName + " uploaded.";
-            Notification.show(msg);
-        }
-
-        @Override
-        protected FileBuffer createReceiver() {
-            return new FileBuffer() {
-                @Override
-                public FileFactory getFileFactory() {
-                    return SlowMultiFileUpload.this.getFileFactory();
-                }
-
-                @Override
-                public OutputStream receiveUpload(String filename,
-                        String MIMEType) {
-                    final OutputStream receiveUpload = super.receiveUpload(
-                            filename, MIMEType);
-                    OutputStream slow = new OutputStream() {
-                        private int slept;
-                        private int written;
-
-                        @Override
-                        public void write(int b) throws IOException {
-                            receiveUpload.write(b);
-                            written++;
-                            if (slept < 60000 && written % 1024 == 0) {
-                                int sleep = 5;
-                                slept += sleep;
-                                try {
-                                    Thread.sleep(sleep);
-                                } catch (InterruptedException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    };
-                    return slow;
-                }
-
-            };
-        }
-
-    }
-
     private Component hr() {
         Label label = new Label("<hr>", Label.CONTENT_XHTML);
         return label;
+    }
+
+    /**
+     * An example of custom field editing for example DB entity containing the
+     * content of the file and its mime type.
+     */
+    public static class CustomFieldEditingBothMimeAndContent extends CustomField<FileEntity> {
+
+        private UploadField field = new UploadField();
+        private FileEntity fileEntity;
+
+        public CustomFieldEditingBothMimeAndContent() {
+            field.setFieldType(FieldType.BYTE_ARRAY);
+
+            field.addValueChangeListener(new ValueChangeListener() {
+                @Override
+                public void valueChange(Property.ValueChangeEvent event) {
+                    fileEntity.setValue((byte[]) field.getValue());
+                    fileEntity.setMimeType(field.getLastMimeType());
+                }
+            });
+        }
+
+        @Override
+        protected Component initContent() {
+            return field;
+        }
+
+        @Override
+        protected void setInternalValue(FileEntity newValue) {
+            fileEntity = newValue;
+
+            field.setLastMimeType(fileEntity.getMimeType());
+
+            // UploadField don't properly support setValue, but only databinding
+            BeanItem beanItem = new BeanItem(newValue);
+            field.setPropertyDataSource(beanItem.getItemProperty("value"));
+
+            super.setInternalValue(newValue);
+        }
+
+        @Override
+        public Class<? extends FileEntity> getType() {
+            return FileEntity.class;
+        }
+
     }
 
 }
