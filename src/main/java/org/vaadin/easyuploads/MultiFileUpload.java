@@ -264,6 +264,16 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             public FileFactory getFileFactory() {
                 return MultiFileUpload.this.getFileFactory();
             }
+
+            @Override
+            public void setLastMimeType(String mimeType) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void setLastFileName(String fileName) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         };
         return receiver;
     }
