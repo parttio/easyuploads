@@ -110,6 +110,13 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
         });
 
         fileEntity.setCaption("Nested class editor example");
+        
+        fileEntity.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+                Notification.show("ValueChangeListener", "In custom field", Notification.Type.TRAY_NOTIFICATION);
+            }
+        });
 
         final BeanWithFileEntity beanWithFileEntity = new BeanWithFileEntity();
 
@@ -167,6 +174,7 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
                 public void valueChange(Property.ValueChangeEvent event) {
                     fileEntity.setValue((byte[]) field.getValue());
                     fileEntity.setMimeType(field.getLastMimeType());
+                    CustomFieldEditingBothMimeAndContent.this.fireValueChange(false);
                 }
             });
         }
