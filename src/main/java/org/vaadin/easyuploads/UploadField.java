@@ -168,6 +168,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     }
 
     public void setLastMimeType(String mimeType) {
+        receiver.setLastMimeType(mimeType);
     }
 
     public enum StorageMode {
