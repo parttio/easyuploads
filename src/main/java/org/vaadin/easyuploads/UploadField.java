@@ -1,19 +1,5 @@
 package org.vaadin.easyuploads;
 
-import com.vaadin.data.Buffered;
-import com.vaadin.data.Property;
-import com.vaadin.data.Validatable;
-import com.vaadin.data.Validator;
-import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Upload.FinishedEvent;
-import com.vaadin.ui.Upload.FinishedListener;
-import com.vaadin.ui.Upload.ProgressListener;
-import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.Upload.StartedEvent;
-import com.vaadin.ui.Upload.StartedListener;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -21,12 +7,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import org.vaadin.viritin.label.RichText;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
+import com.vaadin.data.HasValue;
+import com.vaadin.shared.Registration;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Component.Focusable;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.Upload;
+import com.vaadin.ui.Upload.FinishedEvent;
+import com.vaadin.ui.Upload.FinishedListener;
+import com.vaadin.ui.Upload.ProgressListener;
+import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.StartedEvent;
+import com.vaadin.ui.Upload.StartedListener;
+import com.vaadin.v7.ui.ProgressIndicator;
 
 /**
  * UploadField is a helper class that uses rather low level {@link Upload}
@@ -69,8 +69,8 @@ import org.vaadin.viritin.label.RichText;
  * @author Matti Tahvonen
  * 
  */
-@SuppressWarnings({ "serial", "unused" })
-public class UploadField extends CssLayout implements Field, StartedListener,
+@SuppressWarnings({ "serial" })
+public class UploadField extends CssLayout implements HasValue<Object>, Focusable, StartedListener,
         FinishedListener, ProgressListener {
     private static final int MAX_SHOWN_BYTES = 5;
 
@@ -79,7 +79,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     private Upload upload;
     protected Component display;
 
-    private ProgressIndicator progress = new ProgressIndicator();
+    private ProgressBar progress = new ProgressBar();
 
     private StorageMode storageMode;
 
@@ -91,17 +91,33 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         setWidth("200px");
         setStorageMode(mode);
         upload = new Upload(null, receiver);
-        upload.setImmediate(true);
-        upload.addListener((StartedListener) this);
-        upload.addListener((FinishedListener) this);
-        upload.addListener((ProgressListener) this);
+        upload.addStartedListener(this);
+        upload.addFinishedListener(this);
+        upload.addProgressListener(this);
         upload.setButtonCaption("Choose File");
         progress.setVisible(false);
-        progress.setPollingInterval(500);
         display = createDisplayComponent();
         buildDefaulLayout();
     }
+    
+    /**
+     * @see com.vaadin.ui.AbstractComponent#setReadOnly(boolean)
+     * @see com.vaadin.data.HasValue#setReadOnly(boolean)
+     */
+    @Override
+    public void setReadOnly(boolean readOnly) {
+    	super.setReadOnly(readOnly);
+    }
 
+    /**
+     * @see com.vaadin.ui.AbstractComponent#isReadOnly()
+     * @see com.vaadin.data.HasValue#isReadOnly()
+     */
+    @Override
+    public boolean isReadOnly() {
+    	return super.isReadOnly();
+    }
+    
     public void setButtonCaption(String caption) {
         upload.setButtonCaption(caption);
     }
@@ -196,10 +212,6 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     private String lastFileName;
 
-    public Class<?> getType() {
-        return fieldType.getRawType();
-    }
-
     public void setFieldType(FieldType type) {
         fieldType = type;
         if (type == FieldType.FILE) {
@@ -225,14 +237,16 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         /**
          * @see com.vaadin.ui.Upload.Receiver#receiveUpload(String, String)
          */
-        public OutputStream receiveUpload(String filename, String MIMEType) {
+        @Override
+		public OutputStream receiveUpload(String filename, String MIMEType) {
             fileName = filename;
             mimeType = MIMEType;
             outputBuffer = new ByteArrayOutputStream();
             return outputBuffer;
         }
 
-        public Object getValue() {
+        @Override
+		public Object getValue() {
             if (outputBuffer == null) {
                 return null;
             }
@@ -247,14 +261,16 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             }
         }
 
-        public InputStream getContentAsStream() {
+        @Override
+		public InputStream getContentAsStream() {
             byte[] byteArray = outputBuffer.toByteArray();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
                     byteArray);
             return byteArrayInputStream;
         }
 
-        public void setValue(Object newValue) {
+        @Override
+		public void setValue(Object newValue) {
             mimeType = null;
             fileName = null;
             outputBuffer = new ByteArrayOutputStream();
@@ -335,15 +351,14 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         return fileFactory;
     }
 
-    public void setValue(Object newValue) {
+    @Override
+	public void setValue(Object newValue) {
         receiver.setValue(newValue);
-        if (writeTroughMode) {
-            commit();
-        }
         fireValueChange();
     }
 
-    public Object getValue() {
+    @Override
+	public Object getValue() {
         return receiver.getValue();
     }
 
@@ -351,18 +366,17 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         return receiver.getContentAsStream();
     }
 
-    public void uploadStarted(StartedEvent event) {
+    @Override
+	public void uploadStarted(StartedEvent event) {
         progress.setVisible(true);
         progress.setValue(0f);
     }
 
-    public void uploadFinished(FinishedEvent event) {
+    @Override
+	public void uploadFinished(FinishedEvent event) {
         progress.setVisible(false);
         lastFileName = event.getFilename();
         updateDisplay();
-        if (writeTroughMode) {
-            commit();
-        }
         fireValueChange();
     }
 
@@ -385,11 +399,11 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     }
 
     protected Component createDisplayComponent() {
-        return new RichText("");
+        return new Label("");
     }
 
     protected void updateDisplayComponent() {
-        ((RichText) display).setRichText(getDisplayDetails());
+        ((Label) display).setValue(getDisplayDetails());
         if (display.getParent() == null) {
             getRootLayout().addComponent(display);
         }
@@ -403,7 +417,8 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             if (deleteButton == null) {
                 deleteButton = new Button(getDeleteCaption());
                 deleteButton.addClickListener(new Button.ClickListener() {
-                    public void buttonClick(ClickEvent arg0) {
+                    @Override
+					public void buttonClick(ClickEvent arg0) {
                         setValue(null);
                         getRootLayout().removeComponent(arg0.getButton());
                         updateDisplay();
@@ -433,7 +448,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         StringBuilder sb = new StringBuilder();
         if(getFieldType() == FieldType.FILE) {
         sb.append("File: ");
-        sb.append(lastFileName);
+        sb.append(StringEscapeUtils.escapeXml11(lastFileName));
             sb.append("</br> ");
         }
         sb.append("<em>");
@@ -457,13 +472,14 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             if (string.length() > 200) {
                 string = string.substring(0, 199) + "...";
             }
-            sb.append(string);
+            sb.append(StringEscapeUtils.escapeXml11(string));
         }
         sb.append("</em>");
         return sb.toString();
     }
 
-    public void updateProgress(long readBytes, long contentLength) {
+    @Override
+	public void updateProgress(long readBytes, long contentLength) {
         progress.setValue((float) readBytes / contentLength);
     }
 
@@ -480,41 +496,6 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     // FIELD RELATED FIELDS
 
     /**
-     * Connected data-source.
-     */
-    private Property dataSource = null;
-
-    /**
-     * The list of validators.
-     */
-    private LinkedList<Validator> validators = null;
-
-    /**
-     * Auto commit mode.
-     */
-    private boolean writeTroughMode = true;
-
-    /**
-     * Is the field modified but not committed.
-     */
-    private boolean modified = false;
-
-    /**
-     * Current source exception.
-     */
-    private Buffered.SourceException currentBufferedSourceException = null;
-
-    /**
-     * Are the invalid values allowed in fields ?
-     */
-    private boolean invalidAllowed = true;
-
-    /**
-     * Are the invalid values committed ?
-     */
-    private boolean invalidCommitted = false;
-
-    /**
      * The tab order number of this field.
      */
     private int tabIndex = 0;
@@ -524,24 +505,13 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      */
     private boolean required = false;
 
-    /**
-     * The error message for the exception that is thrown when the field is
-     * required but empty.
-     */
-    private String requiredError = "";
-
-    /**
-     * Is automatic validation enabled.
-     */
-    private boolean validationVisible = true;
-
     private static final Method VALUE_CHANGE_METHOD;
 
     static {
         try {
-            VALUE_CHANGE_METHOD = Property.ValueChangeListener.class
+            VALUE_CHANGE_METHOD = HasValue.ValueChangeListener.class
                     .getDeclaredMethod("valueChange",
-                            new Class[] { Property.ValueChangeEvent.class });
+                            new Class[] { HasValue.ValueChangeEvent.class });
         } catch (final java.lang.NoSuchMethodException e) {
             // This should never happen
             throw new java.lang.RuntimeException(
@@ -553,18 +523,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * Adds a value change listener for the field. Don't add a JavaDoc comment
      * here, we use the default documentation from the implemented interface.
      */
-    public void addListener(Property.ValueChangeListener listener) {
-        addListener(AbstractField.ValueChangeEvent.class, listener,
-                VALUE_CHANGE_METHOD);
-    }
-
-    /*
-     * Removes a value change listener from the field. Don't add a JavaDoc
-     * comment here, we use the default documentation from the implemented
-     * interface.
-     */
-    public void removeListener(Property.ValueChangeListener listener) {
-        removeListener(AbstractField.ValueChangeEvent.class, listener,
+    @Override
+	public Registration addValueChangeListener(HasValue.ValueChangeListener listener) {
+        return addListener(HasValue.ValueChangeEvent.class, listener,
                 VALUE_CHANGE_METHOD);
     }
 
@@ -573,24 +534,10 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * validated before the event is created.
      */
     protected void fireValueChange(boolean repaintIsNotNeeded) {
-        fireEvent(new AbstractField.ValueChangeEvent(this));
+        fireEvent(new HasValue.ValueChangeEvent(this, this, null, ! repaintIsNotNeeded));
         if (!repaintIsNotNeeded) {
             requestRepaint();
         }
-    }
-
-    /**
-     * This method listens to data source value changes and passes the changes
-     * forwards.
-     * 
-     * @param event
-     *            the value change event telling the data source contents have
-     *            changed.
-     */
-    public void valueChange(Property.ValueChangeEvent event) {
-        // if (isReadThrough() || !isModified()) {
-        // fireValueChange(false);
-        // }
     }
 
     /*
@@ -598,8 +545,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * 
      * @see com.vaadin.ui.Component.Focusable#focus()
      */
-    public void focus() {
-        super.focus();
+    @Override
+	public void focus() {
+        upload.focus();
     }
 
     /*
@@ -607,7 +555,8 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * 
      * @see com.vaadin.ui.Component.Focusable#getTabIndex()
      */
-    public int getTabIndex() {
+    @Override
+	public int getTabIndex() {
         return tabIndex;
     }
 
@@ -616,7 +565,8 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * 
      * @see com.vaadin.ui.Component.Focusable#setTabIndex(int)
      */
-    public void setTabIndex(int tabIndex) {
+    @Override
+	public void setTabIndex(int tabIndex) {
         this.tabIndex = tabIndex;
     }
 
@@ -636,7 +586,8 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * @return <code>true</code> if the field is required .otherwise
      *         <code>false</code>.
      */
-    public boolean isRequired() {
+    @Override
+    public boolean isRequiredIndicatorVisible() {
         return required;
     }
 
@@ -655,32 +606,10 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * @param required
      *            Is the field required.
      */
-    public void setRequired(boolean required) {
+    @Override
+	public void setRequiredIndicatorVisible(boolean required) {
         this.required = required;
         requestRepaint();
-    }
-
-    /**
-     * Set the error that is show if this field is required, but empty. When
-     * setting requiredMessage to be "" or null, no error pop-up or exclamation
-     * mark is shown for a empty required field. This faults to "". Even in
-     * those cases isValid() returns false for empty required fields.
-     * 
-     * @param requiredMessage
-     *            Message to be shown when this field is required, but empty.
-     */
-    public void setRequiredError(String requiredMessage) {
-        requiredError = requiredMessage;
-        requestRepaint();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.ui.Field#getRequiredError()
-     */
-    public String getRequiredError() {
-        return requiredError;
     }
 
     /**
@@ -688,222 +617,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * 
      * In general, "empty" state is same as null..
      */
-    public boolean isEmpty() {
+    @Override
+	public boolean isEmpty() {
         return receiver.isEmpty();
-    }
-
-    /**
-     * Is automatic, visible validation enabled?
-     * 
-     * If automatic validation is enabled, any validators connected to this
-     * component are evaluated while painting the component and potential error
-     * messages are sent to client. If the automatic validation is turned off,
-     * isValid() and validate() methods still work, but one must show the
-     * validation in their own code.
-     * 
-     * @return True, if automatic validation is enabled.
-     */
-    public boolean isValidationVisible() {
-        return validationVisible;
-    }
-
-    /**
-     * Enable or disable automatic, visible validation.
-     * 
-     * If automatic validation is enabled, any validators connected to this
-     * component are evaluated while painting the component and potential error
-     * messages are sent to client. If the automatic validation is turned off,
-     * isValid() and validate() methods still work, but one must show the
-     * validation in their own code.
-     * 
-     * @param validateAutomatically
-     *            True, if automatic validation is enabled.
-     */
-    public void setValidationVisible(boolean validateAutomatically) {
-        if (validationVisible != validateAutomatically) {
-            requestRepaint();
-            validationVisible = validateAutomatically;
-        }
-    }
-
-    public void setCurrentBufferedSourceException(
-            Buffered.SourceException currentBufferedSourceException) {
-        this.currentBufferedSourceException = currentBufferedSourceException;
-        requestRepaint();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.BufferedValidatable#isInvalidCommitted()
-     */
-    public boolean isInvalidCommitted() {
-        return invalidCommitted;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.BufferedValidatable#setInvalidCommitted(boolean)
-     */
-    public void setInvalidCommitted(boolean isCommitted) {
-        invalidCommitted = isCommitted;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.Buffered#commit()
-     */
-    public void commit() throws Buffered.SourceException, InvalidValueException {
-        if (dataSource != null && !dataSource.isReadOnly()) {
-            if ((isInvalidCommitted() || isValid())) {
-                final Object newValue = getValue();
-                try {
-
-                    // Commits the value to datasource.
-                    dataSource.setValue(newValue);
-
-                } catch (final Throwable e) {
-
-                    // Sets the buffering state.
-                    currentBufferedSourceException = new Buffered.SourceException(
-                            this, e);
-                    requestRepaint();
-
-                    // Throws the source exception.
-                    throw currentBufferedSourceException;
-                }
-            } else {
-                /* An invalid value and we don't allow them, throw the exception */
-                validate();
-            }
-        }
-
-        boolean repaintNeeded = false;
-
-        // The abstract field is not modified anymore
-        if (modified) {
-            modified = false;
-            repaintNeeded = true;
-        }
-
-        // If successful, remove set the buffering state to be ok
-        if (currentBufferedSourceException != null) {
-            currentBufferedSourceException = null;
-            repaintNeeded = true;
-        }
-
-        if (repaintNeeded) {
-            requestRepaint();
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.Buffered#discard()
-     */
-    public void discard() throws Buffered.SourceException {
-        if (dataSource != null) {
-            Property dataSource2 = dataSource;
-            setPropertyDataSource(null);
-            setPropertyDataSource(dataSource2);
-            modified = false;
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.Buffered#isModified()
-     */
-    public boolean isModified() {
-        return modified;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.Buffered#isWriteThrough()
-     */
-    public boolean isWriteThrough() {
-        return writeTroughMode;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.Buffered#setWriteThrough(boolean)
-     */
-    public void setWriteThrough(boolean writeTrough)
-            throws Buffered.SourceException, InvalidValueException {
-        if (writeTroughMode == writeTrough) {
-            return;
-        }
-        writeTroughMode = writeTrough;
-        if (writeTroughMode) {
-            commit();
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.Buffered#isReadThrough()
-     */
-    public boolean isReadThrough() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.Buffered#setReadThrough(boolean)
-     */
-    public void setReadThrough(boolean readTrough)
-            throws Buffered.SourceException {
-        // TODO implement readthrought somehow ?
-        // throw new UnsupportedOperationException();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.data.Validatable#addValidator(com.vaadin.data.Validator)
-     */
-    public void addValidator(Validator validator) {
-        if (validators == null) {
-            validators = new LinkedList<Validator>();
-        }
-        validators.add(validator);
-        requestRepaint();
-    }
-
-    /**
-     * Gets the validators of the field.
-     * 
-     * @return the Unmodifiable collection that holds all validators for the
-     *         field.
-     */
-    public Collection<Validator> getValidators() {
-        if (validators == null || validators.isEmpty()) {
-            return null;
-        }
-        return Collections.unmodifiableCollection(validators);
-    }
-
-    /**
-     * Removes the validator from the field.
-     * 
-     * @param validator
-     *            the validator to remove.
-     */
-    public void removeValidator(Validator validator) {
-        if (validators != null) {
-            validators.remove(validator);
-        }
-        requestRepaint();
     }
 
     /**
@@ -912,206 +628,17 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * @return <code>true</code> if all registered validators claim that the
      *         current value is valid, <code>false</code> otherwise.
      */
-    public boolean isValid() {
+	public boolean isValid() {
 
         if (isEmpty()) {
-            if (isRequired()) {
+            if (isRequiredIndicatorVisible()) {
                 return false;
             } else {
                 return true;
             }
         }
 
-        if (validators == null) {
-            return true;
-        }
-
-        try {
-            validate();
-            return true;
-        } catch (InvalidValueException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Checks the validity of the Validatable by validating the field with all
-     * attached validators.
-     * 
-     * The "required" validation is a built-in validation feature. If the field
-     * is required, but empty, validation will throw an EmptyValueException with
-     * the error message set with setRequiredError().
-     * 
-     * @see com.vaadin.data.Validatable#validate()
-     */
-    public void validate() throws Validator.InvalidValueException {
-
-        if (isEmpty()) {
-            if (isRequired()) {
-                throw new Validator.EmptyValueException(requiredError);
-            } else {
-                return;
-            }
-        }
-
-        // If there is no validator, there can not be any errors
-        if (validators == null) {
-            return;
-        }
-
-        // Initialize temps
-        Validator.InvalidValueException firstError = null;
-        LinkedList<InvalidValueException> errors = null;
-        final Object value = getValue();
-
-        // Gets all the validation errors
-        for (final Iterator<Validator> i = validators.iterator(); i.hasNext();) {
-            try {
-                (i.next()).validate(value);
-            } catch (final Validator.InvalidValueException e) {
-                if (firstError == null) {
-                    firstError = e;
-                } else {
-                    if (errors == null) {
-                        errors = new LinkedList<InvalidValueException>();
-                        errors.add(firstError);
-                    }
-                    errors.add(e);
-                }
-            }
-        }
-
-        // If there were no error
-        if (firstError == null) {
-            return;
-        }
-
-        // If only one error occurred, throw it forwards
-        if (errors == null) {
-            throw firstError;
-        }
-
-        // Creates composite validator
-        final Validator.InvalidValueException[] exceptions = new Validator.InvalidValueException[errors
-                .size()];
-        int index = 0;
-        for (final Iterator<InvalidValueException> i = errors.iterator(); i
-                .hasNext();) {
-            exceptions[index++] = i.next();
-        }
-
-        throw new Validator.InvalidValueException(null, exceptions);
-    }
-
-    /**
-     * Fields allow invalid values by default. In most cases this is wanted,
-     * because the field otherwise visually forget the user input immediately.
-     * 
-     * @return true iff the invalid values are allowed.
-     * @see com.vaadin.data.Validatable#isInvalidAllowed()
-     */
-    public boolean isInvalidAllowed() {
-        return invalidAllowed;
-    }
-
-    /**
-     * Fields allow invalid values by default. In most cases this is wanted,
-     * because the field otherwise visually forget the user input immediately.
-     * <p>
-     * In common setting where the user wants to assure the correctness of the
-     * datasource, but allow temporarily invalid contents in the field, the user
-     * should add the validators to datasource, that should not allow invalid
-     * values. The validators are automatically copied to the field when the
-     * datasource is set.
-     * </p>
-     * 
-     * @see com.vaadin.data.Validatable#setInvalidAllowed(boolean)
-     */
-    public void setInvalidAllowed(boolean invalidAllowed)
-            throws UnsupportedOperationException {
-        this.invalidAllowed = invalidAllowed;
-    }
-
-    /**
-     * <p>
-     * Sets the specified Property as the data source for the field. All
-     * uncommitted changes to the field are discarded and the value is refreshed
-     * from the new data source.
-     * </p>
-     * 
-     * <p>
-     * If the datasource has any validators, the same validators are added to
-     * the field. Because the default behavior of the field is to allow invalid
-     * values, but not to allow committing them, this only adds visual error
-     * messages to fields and do not allow committing them as long as the value
-     * is invalid. After the value is valid, the error message is not shown and
-     * the commit can be done normally.
-     * </p>
-     * 
-     * @param newDataSource
-     *            the new data source Property.
-     */
-    public void setPropertyDataSource(Property newDataSource) {
-
-        // Stops listening the old data source changes
-        if (dataSource != null
-                && Property.ValueChangeNotifier.class
-                        .isAssignableFrom(dataSource.getClass())) {
-            ((Property.ValueChangeNotifier) dataSource).removeListener(this);
-        }
-
-        Class<?> type = newDataSource == null ? String.class : newDataSource
-                .getType();
-        if (type == byte[].class) {
-            setFieldType(FieldType.BYTE_ARRAY);
-        } else if (type == File.class) {
-            setFieldType(FieldType.FILE);
-        } else if (type == String.class) {
-            setFieldType(FieldType.UTF8_STRING);
-        } else {
-            throw new IllegalArgumentException("Property type " + type
-                    + " is not compatible with UploadField");
-        }
-
-        // Sets the new data source
-        dataSource = newDataSource;
-
-        // Gets the value from source
-        try {
-            if (dataSource != null) {
-                receiver.setValue(dataSource.getValue());
-            } else {
-                receiver.setValue(null);
-            }
-            modified = false;
-        } catch (final Throwable e) {
-            currentBufferedSourceException = new Buffered.SourceException(this,
-                    e);
-            modified = true;
-        }
-
-        // Listens the new data source if possible
-        if (dataSource instanceof Property.ValueChangeNotifier) {
-            ((Property.ValueChangeNotifier) dataSource).addListener(this);
-        }
-
-        // Copy the validators from the data source
-        if (dataSource instanceof Validatable) {
-            final Collection<Validator> validators = ((Validatable) dataSource)
-                    .getValidators();
-            if (validators != null) {
-                for (final Iterator<Validator> i = validators.iterator(); i
-                        .hasNext();) {
-                    addValidator(i.next());
-                }
-            }
-        }
-
-        updateDisplay();
-    }
-
-    public Property getPropertyDataSource() {
-        return dataSource;
+        return true;
     }
 
     protected long getLastFileSize() {
@@ -1124,34 +651,6 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     public String getLastFileName() {
         return receiver.getLastFileName();
-    }
-
-    @Override
-    public void setBuffered(boolean buffered) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean isBuffered() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void removeAllValidators() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void addValueChangeListener(ValueChangeListener listener) {
-        addListener(listener);
-    }
-
-    @Override
-    public void removeValueChangeListener(ValueChangeListener listener) {
-        removeListener(listener);
     }
 
     private Html5FileInputSettings html5FileInputSettings;

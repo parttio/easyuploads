@@ -1,24 +1,24 @@
 package org.vaadin.easyuploads.demoandtestapp;
 
-import java.io.*;
-
-import org.vaadin.easyuploads.*;
+import org.vaadin.addonhelpers.AbstractTest;
+import org.vaadin.easyuploads.UploadField;
 import org.vaadin.easyuploads.UploadField.FieldType;
 import org.vaadin.easyuploads.UploadField.StorageMode;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.Property;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
-import org.vaadin.addonhelpers.AbstractTest;
-import org.vaadin.viritin.layouts.MVerticalLayout;
+import com.vaadin.data.Binder;
+import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.CustomField;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.VerticalLayout;
 
 @Theme("valo")
 public class ByteArrayWithBeanBinding extends AbstractTest {
 
-    private BeanFieldGroup<BeanWithFileEntity> bfg;
+    private Binder<BeanWithFileEntity> bfg;
 
     public static class FileEntity {
 
@@ -89,61 +89,37 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
 
         final FileEntity entity = new FileEntity();
 
-        value.addValueChangeListener(new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                Notification.show("You could change stuff here as well, mimetype:" + value.getLastMimeType());
-            }
-        });
+        value.addValueChangeListener(event -> Notification.show("You could change stuff here as well, mimetype:" + value.getLastMimeType()));
 
         entity.setValue("Foobar".getBytes());
 
-        BeanFieldGroup.bindFieldsUnbuffered(entity, this);
-
         Button b = new Button("Show entity value");
-        b.addClickListener(new Button.ClickListener() {
-
-            @Override
-            public void buttonClick(ClickEvent event) {
-                Notification.show(entity.toString());
-            }
-        });
+        b.addClickListener(event -> Notification.show(entity.toString()));
 
         fileEntity.setCaption("Nested class editor example");
         
-        fileEntity.addValueChangeListener(new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                Notification.show("ValueChangeListener", "In custom field", Notification.Type.TRAY_NOTIFICATION);
-            }
-        });
+        fileEntity.addValueChangeListener(event -> Notification.show("ValueChangeListener", "In custom field", Notification.Type.TRAY_NOTIFICATION));
 
         final BeanWithFileEntity beanWithFileEntity = new BeanWithFileEntity();
 
-        bfg = BeanFieldGroup.bindFieldsUnbuffered(beanWithFileEntity, this);
+        bfg = new Binder<>();
+        bfg.bindInstanceFields(this);
+        bfg.setBean(beanWithFileEntity);
 
         Button showValue = new Button("Show entity value");
-        showValue.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                Notification.show(beanWithFileEntity.toString());
-            }
-        });
+        showValue.addClickListener(event -> Notification.show(beanWithFileEntity.toString()));
 
         Button rebind = new Button("Bind with value");
-        rebind.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                
-                FileEntity fe = new FileEntity();
-                fe.setValue("Simple text example".getBytes());
-                fe.setMimeType("text/plain");
-                beanWithFileEntity.setFileEntity(fe);
-                BeanFieldGroup.bindFieldsUnbuffered(beanWithFileEntity, ByteArrayWithBeanBinding.this);
-            }
+        rebind.addClickListener(event -> {
+            FileEntity fe = new FileEntity();
+            fe.setValue("Simple text example".getBytes());
+            fe.setMimeType("text/plain");
+            beanWithFileEntity.setFileEntity(fe);
+            bfg.removeBean();
+            bfg.setBean(beanWithFileEntity);
         });
 
-        return new MVerticalLayout(value, b, fileEntity, showValue, rebind);
+        return new VerticalLayout(value, b, fileEntity, showValue, rebind);
     }
 
     @Override
@@ -153,7 +129,7 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
     }
 
     private Component hr() {
-        Label label = new Label("<hr>", Label.CONTENT_XHTML);
+        Label label = new Label("<hr>", ContentMode.HTML);
         return label;
     }
 
@@ -169,13 +145,10 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
         public CustomFieldEditingBothMimeAndContent() {
             field.setFieldType(FieldType.BYTE_ARRAY);
 
-            field.addValueChangeListener(new ValueChangeListener() {
-                @Override
-                public void valueChange(Property.ValueChangeEvent event) {
-                    fileEntity.setValue((byte[]) field.getValue());
-                    fileEntity.setMimeType(field.getLastMimeType());
-                    CustomFieldEditingBothMimeAndContent.this.fireValueChange(false);
-                }
+            field.addValueChangeListener(event -> {
+                fileEntity.setValue((byte[]) field.getValue());
+                fileEntity.setMimeType(field.getLastMimeType());
+                CustomFieldEditingBothMimeAndContent.this.fireEvent(new ValueChangeEvent<>(event.getComponent(), this, null, false));
             });
         }
 
@@ -185,22 +158,22 @@ public class ByteArrayWithBeanBinding extends AbstractTest {
         }
 
         @Override
-        protected void setInternalValue(FileEntity newValue) {
+        protected void doSetValue(FileEntity newValue) {
             fileEntity = newValue;
 
             field.setLastMimeType(fileEntity.getMimeType());
 
             // UploadField don't properly support setValue, but only databinding
-            BeanItem beanItem = new BeanItem(newValue);
-            field.setPropertyDataSource(beanItem.getItemProperty("value"));
-
-            super.setInternalValue(newValue);
+            field.setValue(newValue.getValue());
         }
 
-        @Override
-        public Class<? extends FileEntity> getType() {
-            return FileEntity.class;
-        }
+		/**
+		 * @see com.vaadin.data.HasValue#getValue()
+		 */
+		@Override
+		public FileEntity getValue() {
+			return fileEntity;
+		}
 
     }
 
