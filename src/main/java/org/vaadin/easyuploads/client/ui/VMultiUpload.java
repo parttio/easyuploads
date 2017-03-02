@@ -119,13 +119,15 @@ public class VMultiUpload extends SimplePanel
     private String receiverUri;
 
     private ReadyStateChangeHandler readyStateChangeHandler = new ReadyStateChangeHandler() {
-        public void onReadyStateChange(XMLHttpRequest xhr) {
+        @Override
+		public void onReadyStateChange(XMLHttpRequest xhr) {
             if (xhr.getReadyState() == XMLHttpRequest.DONE) {
                 xhr.clearOnReadyStateChange();
                 VConsole.log("Ready state + " + xhr.getReadyState());
 
                 Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    public void execute() {
+                    @Override
+					public void execute() {
                         if (isAttached() && !fileQueue.isEmpty()) {
                             client.updateVariable(paintableId, "ready", true,
                                     true);
@@ -144,7 +146,8 @@ public class VMultiUpload extends SimplePanel
         panel.add(fu);
         submitButton = new VButton();
         submitButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
+            @Override
+			public void onClick(ClickEvent event) {
                 // fire click on upload (eg. focused button and hit space)
                 fireNativeClick(fu.getElement());
             }
@@ -157,7 +160,8 @@ public class VMultiUpload extends SimplePanel
         addStyleName(CLASSNAME + "-immediate");
     }
 
-    public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
+    @Override
+	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
         if (client.updateComponent(this, uidl, true)) {
             return;
         }
@@ -292,7 +296,7 @@ public class VMultiUpload extends SimplePanel
             } else if (!AcceptUtil.accepted(file.getName(), file.getType(),
                     accepted)) {
                 noMatches.add(file);
-            } else if (maxFileCount != null && filedetails.size() >= maxFileCount) {
+            } else if (maxFileCount != null && filedetails.size() > maxFileCount) {
                 tooMany.add(file);
             } else {
                 queueFilePost(file);
