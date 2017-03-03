@@ -11,12 +11,16 @@
     </organization>
 
     <scm>
-        <url>git://github.com/WoozyG/easyuploads.git</url>
-        <connection>scm:git:git://github.com/WoozyG/easyuploads.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:/WoozyG/easyuploads.git</developerConnection>
-        <tag>vaadin upload add-on for Vaadin 8</tag>
+        <url>git://github.com/mstahv/easyuploads.git</url>
+        <connection>scm:git:git://github.com/mstahv/easyuploads.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:/mstahv/easyuploads.git</developerConnection>
+        <tag>vaadin upload add-on</tag>
     </scm>
 
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/mstahv/easyuploads/issues</url>
+    </issueManagement>
 
     <licenses>
         <license>
@@ -358,14 +362,6 @@
             <version>4.10</version>
             <scope>test</scope>
         </dependency>
-<!--
-        <dependency>
-            <groupId>org.vaadin</groupId>
-            <artifactId>viritin</artifactId>
-            <version>1.53</version>
-            <type>jar</type>
-        </dependency>
--->
     </dependencies>
 
 </project>
