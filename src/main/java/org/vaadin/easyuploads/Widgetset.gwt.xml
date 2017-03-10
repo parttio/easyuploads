@@ -4,7 +4,7 @@
 	<!-- WS Compiler: manually edited -->
 
 	<inherits name="org.swfupload.SWFUpload" />
-	<inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
+    <inherits name="com.vaadin.DefaultWidgetSet" />
 
 	<replace-with class="org.vaadin.easyuploads.client.ui.VSWFUpload">
 		<when-type-is class="org.vaadin.easyuploads.client.ui.VMultiUpload" />

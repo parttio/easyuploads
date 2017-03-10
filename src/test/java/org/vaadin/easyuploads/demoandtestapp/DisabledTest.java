@@ -1,19 +1,17 @@
 package org.vaadin.easyuploads.demoandtestapp;
 
+import java.io.File;
+
+import org.vaadin.addonhelpers.AbstractTest;
+import org.vaadin.easyuploads.UploadField;
+
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.Property;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
-import java.io.File;
-
-import org.vaadin.easyuploads.*;
-
-import org.vaadin.addonhelpers.AbstractTest;
 
 @Theme("valo")
 public class DisabledTest extends AbstractTest {
@@ -48,12 +46,7 @@ public class DisabledTest extends AbstractTest {
         file.setButtonCaption("...Select File");
         file.setDisplayUpload(false);
 
-        file.addValueChangeListener(new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                Notification.show("File uploaded" + file.getLastFileName() + " IsEmpty:" + file.isEmpty());
-            }
-        });
+        file.addValueChangeListener(event -> Notification.show("File uploaded" + file.getLastFileName() + " IsEmpty:" + file.isEmpty()));
 
         layout.addComponent(file);
         
@@ -68,15 +61,12 @@ public class DisabledTest extends AbstractTest {
  
         CheckBox cb = new CheckBox("Enabled");
         cb.setValue(false);
-        cb.addValueChangeListener(new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                final boolean nextEnabled = !file.isEnabled();
-                file.setEnabled(nextEnabled);
-                wrap.setEnabled(nextEnabled);
-                boolean enabled = upload.isEnabled();
-                Notification.show("Enabled: " + enabled);
-            }
+        cb.addValueChangeListener(event -> {
+            final boolean nextEnabled = !file.isEnabled();
+            file.setEnabled(nextEnabled);
+            wrap.setEnabled(nextEnabled);
+            boolean enabled = upload.isEnabled();
+            Notification.show("Enabled: " + enabled);
         });
         
         layout.addComponents(wrap, cb);

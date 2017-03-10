@@ -16,12 +16,13 @@ import org.vaadin.easyuploads.UploadField.StorageMode;
 
 import com.google.common.io.Files;
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.ObjectProperty;
-import com.vaadin.data.util.converter.StringToIntegerConverter;
+import com.vaadin.data.Binder;
+import com.vaadin.data.HasValue.ValueChangeEvent;
+import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Component;
@@ -45,7 +46,8 @@ public class BasicTest extends AbstractTest {
         
         Button b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
+            @Override
+			public void buttonClick(ClickEvent event) {
                 Object value = uploadField.getValue();
                 Notification.show("Value:" + value);
             }
@@ -61,7 +63,8 @@ public class BasicTest extends AbstractTest {
         
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
+            @Override
+			public void buttonClick(ClickEvent event) {
                 Object value = uploadField2.getValue();
                 Notification.show("Value:" + value);
             }
@@ -77,7 +80,8 @@ public class BasicTest extends AbstractTest {
                 + uploadField3.getFieldType());
         
         uploadField3.setFileFactory(new FileFactory() {
-            public File createFile(String fileName, String mimeType) {
+            @Override
+			public File createFile(String fileName, String mimeType) {
                 File f = new File(tempDir, fileName);
                 return f;
             }
@@ -91,7 +95,8 @@ public class BasicTest extends AbstractTest {
         uploadFieldHtml5Configured.setMaxFileSize(1000000);
         
         uploadFieldHtml5Configured.setFileFactory(new FileFactory() {
-            public File createFile(String fileName, String mimeType) {
+            @Override
+			public File createFile(String fileName, String mimeType) {
                 File f = new File(tempDir, fileName);
                 return f;
             }
@@ -99,7 +104,8 @@ public class BasicTest extends AbstractTest {
         
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
+            @Override
+			public void buttonClick(ClickEvent event) {
                 Object value = uploadFieldHtml5Configured.getValue();
                 Notification.show("Value:" + value);
             }
@@ -115,11 +121,8 @@ public class BasicTest extends AbstractTest {
                 .setCaption("writethrough=false, Storagemode: memory , fieldType:"
                         + uploadField4.getFieldType());
         
-        uploadField4.setPropertyDataSource(new ObjectProperty<String>(
-                "propertyvalue"));
-        uploadField4.setWriteThrough(false);
         mainWindow.addComponent(uploadField4);
-        uploadField4.addListener(new ValueChangeListener() {
+        uploadField4.addValueChangeListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
                 Notification.show("ValueChangeEvent fired.");
@@ -127,7 +130,8 @@ public class BasicTest extends AbstractTest {
         });
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
+            @Override
+			public void buttonClick(ClickEvent event) {
                 Object value = uploadField4.getValue();
                 Notification.show("Value:" + value);
             }
@@ -135,8 +139,9 @@ public class BasicTest extends AbstractTest {
         mainWindow.addComponent(b);
         b = new Button("Discard");
         b.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                uploadField4.discard();
+            @Override
+			public void buttonClick(ClickEvent event) {
+                uploadField4.clear();
                 Object value = uploadField4.getValue();
                 Notification.show("Value:" + value);
             }
@@ -163,7 +168,8 @@ public class BasicTest extends AbstractTest {
         
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
+            @Override
+			public void buttonClick(ClickEvent event) {
                 Object value = uploadField5.getValue();
                 Notification.show("Value:" + value);
             }
@@ -182,7 +188,8 @@ public class BasicTest extends AbstractTest {
                 if (mimeType.equals("image/png")) {
                     Resource resource = new StreamResource(
                             new StreamResource.StreamSource() {
-                        public InputStream getStream() {
+                        @Override
+						public InputStream getStream() {
                             return new ByteArrayInputStream(pngData);
                         }
                     }, "") {
@@ -207,7 +214,8 @@ public class BasicTest extends AbstractTest {
         
         b = new Button("Show value");
         b.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
+            @Override
+			public void buttonClick(ClickEvent event) {
                 Object value = uploadField6.getValue();
                 Notification.show("Value:" + value);
             }
@@ -284,9 +292,7 @@ public class BasicTest extends AbstractTest {
         maxSizeMultiUploadLayout.setCaption("MultiFileUpload with maxSize");
         mainWindow.addComponent(maxSizeMultiUploadLayout);
         final TextField maxSizeField = new TextField();
-        maxSizeField.setNullRepresentation("");
         maxSizeField.setCaption("Max size : ");
-        maxSizeField.setConverter(new StringToIntegerConverter());
         maxSizeMultiUploadLayout.addComponent(maxSizeField);
         final MultiFileUpload multiFileUploadWithMaxSize = new MultiFileUpload() {
             @Override
@@ -296,18 +302,21 @@ public class BasicTest extends AbstractTest {
                 Notification.show(msg);
             }
         };
-        maxSizeField.addValueChangeListener(new ValueChangeListener() {
-            
-            @Override
-            public void valueChange(ValueChangeEvent event) {
+        
+        final Binder<Integer[]> binder = new Binder<>();
+        final Integer[] maxSize = new Integer[1];
+        binder.forField(maxSizeField)
+        .withConverter(new StringToIntegerConverter("Invalid int"))
+        .bind((o) -> maxSize[0], (o, i) -> maxSize[0] = i);
+        binder.addValueChangeListener(event -> {
                 if (maxSizeField.getValue() != null) {
-                    multiFileUploadWithMaxSize.setMaxFileSize((Integer) maxSizeField.getConvertedValue());
+                    multiFileUploadWithMaxSize.setMaxFileSize((Integer) event.getValue());
                 } else {
                     multiFileUploadWithMaxSize.setMaxFileSize(0);
                 }
             }
-        });
-        maxSizeField.setConvertedValue(1048576);
+        );
+        maxSizeField.setValue("1048576");
         
         maxSizeMultiUploadLayout.addComponent(multiFileUploadWithMaxSize);
         mainWindow.addComponent(hr());
@@ -382,7 +391,7 @@ public class BasicTest extends AbstractTest {
     }
     
     private Component hr() {
-        Label label = new Label("<hr>", Label.CONTENT_XHTML);
+        Label label = new Label("<hr>", ContentMode.HTML);
         return label;
     }
     

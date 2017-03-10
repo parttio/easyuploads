@@ -29,6 +29,7 @@ import com.vaadin.server.StreamVariable.StreamingProgressEvent;
 import com.vaadin.server.StreamVariable.StreamingStartEvent;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.communication.PushMode;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DragAndDropWrapper;
@@ -121,14 +122,16 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
         MultiUploadHandler handler = new MultiUploadHandler() {
             private LinkedList<ProgressBar> indicators;
 
-            public void streamingStarted(StreamingStartEvent event) {
+            @Override
+			public void streamingStarted(StreamingStartEvent event) {
                 if (maxFileSize > 0 && event.getContentLength() > maxFileSize) {
                     throw new MaxFileSizeExceededException(
                             event.getContentLength(), maxFileSize);
                 }
             }
 
-            public void streamingFinished(StreamingEndEvent event) {
+            @Override
+			public void streamingFinished(StreamingEndEvent event) {
                 if (!indicators.isEmpty()) {
                     getprogressBarsLayout()
                             .removeComponent(indicators.remove(0));
@@ -144,7 +147,8 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 resetPollIntervalIfNecessary();
             }
 
-            public void streamingFailed(StreamingErrorEvent event) {
+            @Override
+			public void streamingFailed(StreamingErrorEvent event) {
                 Logger.getLogger(getClass().getName()).log(Level.FINE,
                         "Streaming failed", event.getException());
 
@@ -155,21 +159,24 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 resetPollIntervalIfNecessary();
             }
 
-            public void onProgress(StreamingProgressEvent event) {
+            @Override
+			public void onProgress(StreamingProgressEvent event) {
                 long readBytes = event.getBytesReceived();
                 long contentLength = event.getContentLength();
                 float f = (float) readBytes / (float) contentLength;
                 indicators.get(0).setValue(f);
             }
 
-            public OutputStream getOutputStream() {
+            @Override
+			public OutputStream getOutputStream() {
                 FileDetail next = upload.getPendingFileNames().iterator()
                         .next();
                 return receiver.receiveUpload(next.getFileName(),
                         next.getMimeType());
             }
 
-            public void filesQueued(Collection<FileDetail> pendingFileNames) {
+            @Override
+			public void filesQueued(Collection<FileDetail> pendingFileNames) {
                 if (indicators == null) {
                     indicators = new LinkedList<ProgressBar>();
                 }
@@ -297,7 +304,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
      */
     protected void prepareDropZone() {
         if (dropZone == null) {
-            Component label = new Label(getAreaText(), Label.CONTENT_XHTML);
+            Component label = new Label(getAreaText(), ContentMode.HTML);
             label.setSizeUndefined();
             dropZone = new DragAndDropWrapper(label);
             dropZone.setStyleName("v-multifileupload-dropzone");
@@ -346,14 +353,16 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 new DirectoryFileFactory(new File(directoryWhereToUpload)));
     }
 
-    public AcceptCriterion getAcceptCriterion() {
+    @Override
+	public AcceptCriterion getAcceptCriterion() {
         // TODO accept only files
         // return new And(new TargetDetailIs("verticalLocation","MIDDLE"), new
         // TargetDetailIs("horizontalLoction", "MIDDLE"));
         return AcceptAll.get();
     }
 
-    public void drop(DragAndDropEvent event) {
+    @Override
+	public void drop(DragAndDropEvent event) {
         DragAndDropWrapper.WrapperTransferable transferable = (WrapperTransferable) event
                 .getTransferable();
         Html5File[] files = transferable.getFiles();
@@ -385,27 +394,32 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 private String name;
                 private String mime;
 
-                public OutputStream getOutputStream() {
+                @Override
+				public OutputStream getOutputStream() {
                     return receiver.receiveUpload(name, mime);
                 }
 
-                public boolean listenProgress() {
+                @Override
+				public boolean listenProgress() {
                     return true;
                 }
 
-                public void onProgress(StreamingProgressEvent event) {
+                @Override
+				public void onProgress(StreamingProgressEvent event) {
                     float p = (float) event.getBytesReceived()
                             / (float) event.getContentLength();
                     pi.setValue(p);
                 }
 
-                public void streamingStarted(StreamingStartEvent event) {
+                @Override
+				public void streamingStarted(StreamingStartEvent event) {
                     name = event.getFileName();
                     mime = event.getMimeType();
 
                 }
 
-                public void streamingFinished(StreamingEndEvent event) {
+                @Override
+				public void streamingFinished(StreamingEndEvent event) {
                     getprogressBarsLayout().removeComponent(pi);
                     handleFile(receiver.getFile(), html5File.getFileName(),
                             html5File.getType(), html5File.getFileSize());
@@ -413,12 +427,14 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                     resetPollIntervalIfNecessary();
                 }
 
-                public void streamingFailed(StreamingErrorEvent event) {
+                @Override
+				public void streamingFailed(StreamingErrorEvent event) {
                     getprogressBarsLayout().removeComponent(pi);
                     resetPollIntervalIfNecessary();
                 }
 
-                public boolean isInterrupted() {
+                @Override
+				public boolean isInterrupted() {
                     return false;
                 }
             });

@@ -1,32 +1,27 @@
 package org.vaadin.easyuploads.demoandtestapp;
 
-import org.vaadin.easyuploads.ImagePreviewField;
-import com.vaadin.annotations.Theme;
-import java.io.*;
-import java.text.*;
-import java.util.*;
-
-import javax.imageio.*;
-
-import org.vaadin.easyuploads.*;
-import org.vaadin.easyuploads.UploadField.FieldType;
-
-import com.vaadin.server.*;
-import com.vaadin.ui.*;
-import com.vaadin.ui.themes.ValoTheme;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.commons.io.IOUtils;
 import org.vaadin.addonhelpers.AbstractTest;
-import org.vaadin.viritin.BeanBinder;
-import org.vaadin.viritin.MBeanFieldGroup;
-import org.vaadin.viritin.layouts.MHorizontalLayout;
-import org.vaadin.viritin.layouts.MVerticalLayout;
+import org.vaadin.easyuploads.ImagePreviewField;
+
+import com.vaadin.annotations.Theme;
+import com.vaadin.data.Binder;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.VerticalLayout;
 
 @Theme("valo")
 public class CustomDisplayTestWithPojo extends AbstractTest {
 
-    private MBeanFieldGroup<Pojo> bfg;
+    private Binder<Pojo> bfg;
 
     public static class Pojo {
 
@@ -57,7 +52,7 @@ public class CustomDisplayTestWithPojo extends AbstractTest {
 
     @Override
     public Component getTestComponent() {
-        VerticalLayout layout = new MVerticalLayout();
+        VerticalLayout layout = new VerticalLayout();
         photo.setCaption("Custom prview for images.");
 
         Button button = new Button("Show photo state");
@@ -78,33 +73,29 @@ public class CustomDisplayTestWithPojo extends AbstractTest {
         });
 
         Button load = new Button("Load photo");
-        load.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                bfg.unbind();
-                InputStream resourceAsStream = getClass().getResourceAsStream("/boat.png");
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                try {
-                    IOUtils.copy(resourceAsStream, byteArrayOutputStream);
-                    pojo.setPhoto(byteArrayOutputStream.toByteArray());
-                    bfg = BeanBinder.bind(pojo, CustomDisplayTestWithPojo.this);
-                } catch (IOException ex) {
-                    Logger.getLogger(CustomDisplayTestWithPojo.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        load.addClickListener(event -> {
+            bfg.removeBean();
+            InputStream resourceAsStream = getClass().getResourceAsStream("/boat.png");
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            try {
+                IOUtils.copy(resourceAsStream, byteArrayOutputStream);
+                pojo.setPhoto(byteArrayOutputStream.toByteArray());
+                bfg.setBean(pojo);
+            } catch (IOException ex) {
+                Logger.getLogger(CustomDisplayTestWithPojo.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
 
-        Button clear = new Button("clear value", new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
+        Button clear = new Button("clear value", event -> {
                 pojo.setPhoto(null);
-                bfg = BeanBinder.bind(pojo, CustomDisplayTestWithPojo.this);
-            }
+                bfg.setBean(pojo);
         });
 
-        bfg = BeanBinder.bind(pojo, this);
+        bfg = new Binder<>();
+        bfg.bindInstanceFields(this);
+        bfg.setBean(pojo);
 
-        layout.addComponents(photo, new MHorizontalLayout( button, load, clear));
+        layout.addComponents(photo, new HorizontalLayout( button, load, clear));
         return layout;
     }
 
