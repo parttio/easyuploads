@@ -26,7 +26,6 @@ import com.vaadin.ui.Upload.ProgressListener;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.StartedEvent;
 import com.vaadin.ui.Upload.StartedListener;
-import com.vaadin.v7.ui.ProgressIndicator;
 
 /**
  * UploadField is a helper class that uses rather low level {@link Upload}

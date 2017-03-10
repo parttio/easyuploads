@@ -5,7 +5,6 @@
 
 	<inherits name="org.swfupload.SWFUpload" />
     <inherits name="com.vaadin.DefaultWidgetSet" />
-    <inherits name="com.vaadin.v7.Vaadin7WidgetSet" />
 
 	<replace-with class="org.vaadin.easyuploads.client.ui.VSWFUpload">
 		<when-type-is class="org.vaadin.easyuploads.client.ui.VMultiUpload" />
