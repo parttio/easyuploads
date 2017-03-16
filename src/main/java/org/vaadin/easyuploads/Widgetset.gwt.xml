@@ -6,7 +6,7 @@
 	<inherits name="com.vaadin.v7.Vaadin7WidgetSet" />
 	
 	<replace-with class="org.vaadin.easyuploads.client.ui.VCustomUpload">
-		<when-type-is class="com.vaadin.client.ui.VUpload"/>
+		<when-type-is class="com.vaadin.v7.client.ui.VUpload"/>
 	</replace-with>
 
 	<stylesheet src="easyuploads.css" />
