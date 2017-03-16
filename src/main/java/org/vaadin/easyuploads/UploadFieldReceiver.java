@@ -2,7 +2,7 @@ package org.vaadin.easyuploads;
 
 import java.io.InputStream;
 
-import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.v7.ui.Upload.Receiver;
 
 interface UploadFieldReceiver extends Receiver {
 	Object getValue();

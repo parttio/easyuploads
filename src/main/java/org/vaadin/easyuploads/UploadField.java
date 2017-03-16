@@ -1,18 +1,24 @@
 package org.vaadin.easyuploads;
 
-import com.vaadin.data.Buffered;
-import com.vaadin.data.Property;
-import com.vaadin.data.Validatable;
-import com.vaadin.data.Validator;
-import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Button;
+import com.vaadin.v7.data.Buffered;
+import com.vaadin.v7.data.Property;
+import com.vaadin.v7.data.Validatable;
+import com.vaadin.v7.data.Validator;
+import com.vaadin.v7.data.Validator.InvalidValueException;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Upload.FinishedEvent;
-import com.vaadin.ui.Upload.FinishedListener;
-import com.vaadin.ui.Upload.ProgressListener;
-import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.Upload.StartedEvent;
-import com.vaadin.ui.Upload.StartedListener;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.CssLayout;
+import com.vaadin.v7.ui.Upload.FinishedEvent;
+import com.vaadin.v7.ui.Upload.FinishedListener;
+import com.vaadin.v7.ui.Upload.ProgressListener;
+import com.vaadin.v7.ui.Upload.Receiver;
+import com.vaadin.v7.ui.Upload.StartedEvent;
+import com.vaadin.v7.ui.Upload.StartedListener;
+import com.vaadin.v7.ui.AbstractField;
+import com.vaadin.v7.ui.Field;
+import com.vaadin.v7.ui.ProgressIndicator;
+import com.vaadin.v7.ui.Upload;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,12 +26,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import org.vaadin.viritin.label.RichText;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.vaadin.viritin.v7.label.RichText;
 
 
 /**
@@ -82,6 +93,8 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     private ProgressIndicator progress = new ProgressIndicator();
 
     private StorageMode storageMode;
+    
+    private List<Component> toBeSetReadOnly = new ArrayList<>();
 
     public UploadField() {
         this(StorageMode.FILE);
@@ -91,6 +104,8 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         setWidth("200px");
         setStorageMode(mode);
         upload = new Upload(null, receiver);
+        toBeSetReadOnly.add(upload);
+        upload.setReadOnly(required);
         upload.setImmediate(true);
         upload.addListener((StartedListener) this);
         upload.addListener((FinishedListener) this);
@@ -144,12 +159,15 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
                 @Override
                 public void setLastMimeType(String mimeType) {
-                    throw new UnsupportedOperationException("Not supported yet.");
+                    // this now appears to be called
+                    //throw new UnsupportedOperationException("Not supported yet.");
+                    
                 }
 
                 @Override
                 public void setLastFileName(String fileName) {
-                    throw new UnsupportedOperationException("Not supported yet.");
+                    // this now appears to be called
+                    //throw new UnsupportedOperationException("Not supported yet.");
                 }
                 };
                 break;
@@ -409,6 +427,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
                         updateDisplay();
                     }
                 });
+                toBeSetReadOnly.add(deleteButton);
             }
             if (deleteButton.getParent() == null) {
                 attachDeleteButton(deleteButton);
@@ -865,6 +884,37 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             throws Buffered.SourceException {
         // TODO implement readthrought somehow ?
         // throw new UnsupportedOperationException();
+    }
+
+    private boolean readOnly = false;
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+        for (Component component : toBeSetReadOnly) {
+            Class<? extends Component> aClass = component.getClass();
+            try {
+                Method m = aClass.getMethod("setReadOnly", boolean.class);
+                m.setAccessible(true);
+                m.invoke(component, readOnly);
+            } catch (NoSuchMethodException ex) {
+                // fall back to enabled if read only not supported
+                component.setEnabled(!readOnly);
+            } catch (SecurityException ex) {
+                Logger.getLogger(UploadField.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(UploadField.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(UploadField.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(UploadField.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     /*

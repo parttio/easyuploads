@@ -2,24 +2,17 @@ package org.vaadin.easyuploads.demoandtestapp;
 
 import org.vaadin.easyuploads.ImagePreviewField;
 import com.vaadin.annotations.Theme;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.VerticalLayout;
 import java.io.*;
-import java.text.*;
-import java.util.*;
-
-import javax.imageio.*;
-
-import org.vaadin.easyuploads.*;
-import org.vaadin.easyuploads.UploadField.FieldType;
-
-import com.vaadin.server.*;
-import com.vaadin.ui.*;
-import com.vaadin.ui.themes.ValoTheme;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.vaadin.addonhelpers.AbstractTest;
-import org.vaadin.viritin.BeanBinder;
-import org.vaadin.viritin.MBeanFieldGroup;
+import org.vaadin.viritin.v7.BeanBinder;
+import org.vaadin.viritin.v7.MBeanFieldGroup;
 import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 

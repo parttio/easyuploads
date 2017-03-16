@@ -1,17 +1,21 @@
 package org.vaadin.easyuploads.demoandtestapp;
 
-import java.io.*;
 
 import org.vaadin.easyuploads.*;
 import org.vaadin.easyuploads.UploadField.FieldType;
 import org.vaadin.easyuploads.UploadField.StorageMode;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.Property;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Button;
+import com.vaadin.v7.data.Property;
+import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.v7.data.util.BeanItem;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification;
+import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.v7.ui.CustomField;
+import com.vaadin.v7.ui.Label;
 import org.vaadin.addonhelpers.AbstractTest;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 

@@ -1,11 +1,10 @@
 package org.vaadin.easyuploads.demoandtestapp;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.Property;
+import com.vaadin.v7.data.Property;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
+import com.vaadin.v7.ui.CheckBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
@@ -17,6 +16,11 @@ import org.vaadin.addonhelpers.AbstractTest;
 
 @Theme("valo")
 public class DisabledTest extends AbstractTest {
+
+    @Override
+    public String getDescription() {
+        return "See https://github.com/vaadin/framework/issues/7930";
+    }
 
     public static class MyBean {
 

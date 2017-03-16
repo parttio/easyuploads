@@ -29,6 +29,7 @@ import com.vaadin.server.StreamVariable.StreamingProgressEvent;
 import com.vaadin.server.StreamVariable.StreamingStartEvent;
 import com.vaadin.server.WebBrowser;
 import com.vaadin.shared.communication.PushMode;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DragAndDropWrapper;
@@ -108,7 +109,10 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
     protected Layout getprogressBarsLayout() {
         if (progressBars == null) {
-            progressBars = new VerticalLayout();
+            final VerticalLayout verticalLayout = new VerticalLayout();
+            verticalLayout.setMargin(false);
+            verticalLayout.setSpacing(false);
+            progressBars = verticalLayout;
         }
         return progressBars;
     }
@@ -171,7 +175,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
 
             public void filesQueued(Collection<FileDetail> pendingFileNames) {
                 if (indicators == null) {
-                    indicators = new LinkedList<ProgressBar>();
+                    indicators = new LinkedList<>();
                 }
                 acceptedUploads += pendingFileNames.size();
                 for (FileDetail f : pendingFileNames) {
@@ -297,7 +301,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
      */
     protected void prepareDropZone() {
         if (dropZone == null) {
-            Component label = new Label(getAreaText(), Label.CONTENT_XHTML);
+            Component label = new Label(getAreaText(), ContentMode.HTML);
             label.setSizeUndefined();
             dropZone = new DragAndDropWrapper(label);
             dropZone.setStyleName("v-multifileupload-dropzone");

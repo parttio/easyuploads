@@ -3,18 +3,7 @@
 <module>
 	<!-- WS Compiler: manually edited -->
 
-	<inherits name="org.swfupload.SWFUpload" />
-	<inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
-
-	<replace-with class="org.vaadin.easyuploads.client.ui.VSWFUpload">
-		<when-type-is class="org.vaadin.easyuploads.client.ui.VMultiUpload" />
-		<any>
-			<when-property-is name="user.agent" value="ie6" />
-			<when-property-is name="user.agent" value="ie8" />
-			<when-property-is name="user.agent" value="ie9" />
-			<when-property-is name="user.agent" value="opera" />
-		</any>
-	</replace-with>
+	<inherits name="com.vaadin.v7.Vaadin7WidgetSet" />
 	
 	<replace-with class="org.vaadin.easyuploads.client.ui.VCustomUpload">
 		<when-type-is class="com.vaadin.client.ui.VUpload"/>

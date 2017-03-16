@@ -3,9 +3,9 @@ package org.vaadin.easyuploads;
 import org.vaadin.easyuploads.client.Html5FileInputState;
 
 import com.vaadin.server.AbstractExtension;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.Upload.FinishedEvent;
-import com.vaadin.ui.Upload.FinishedListener;
+import com.vaadin.v7.ui.Upload;
+import com.vaadin.v7.ui.Upload.FinishedEvent;
+import com.vaadin.v7.ui.Upload.FinishedListener;
 
 public class Html5FileInputSettings extends AbstractExtension {
 
