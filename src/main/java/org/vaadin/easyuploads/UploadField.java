@@ -38,7 +38,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.vaadin.viritin.v7.label.RichText;
 
-
 /**
  * UploadField is a helper class that uses rather low level {@link Upload}
  * component in core Vaadin. Instead of implementing own {@link Receiver}
@@ -47,7 +46,7 @@ import org.vaadin.viritin.v7.label.RichText;
  * UploadField also provides built in {@link ProgressIndicator} and displays
  * (partly) the uploaded file. What/how is displayed can be easily modified by
  * overriding {@link #updateDisplay()} method.
- * 
+ *
  * <p>
  * UploadField can also be used in a form to edit a property - that's where the
  * name Field comes from. Property can be of type (set with
@@ -69,20 +68,21 @@ import org.vaadin.viritin.v7.label.RichText;
  * {@link StorageMode#MEMORY} mode keeps everything in memory. If the Field is
  * in {@link StorageMode#FILE} mode, the file creation can be controlled with
  * {@link #setFileFactory(FileFactory)}.
- * 
+ *
  * <p>
  * Limitations:
  * <ul>
  * <li>Read through modes are not supported properly.
  * <li> {@link StorageMode#FILE} does not support Buffered properly(?).
  * </ul>
- * 
+ *
  * @author Matti Tahvonen
- * 
+ *
  */
-@SuppressWarnings({ "serial", "unused" })
+@SuppressWarnings({"serial", "unused"})
 public class UploadField extends CssLayout implements Field, StartedListener,
         FinishedListener, ProgressListener {
+
     private static final int MAX_SHOWN_BYTES = 5;
 
     private UploadFieldReceiver receiver;
@@ -93,7 +93,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     private ProgressIndicator progress = new ProgressIndicator();
 
     private StorageMode storageMode;
-    
+
     private List<Component> toBeSetReadOnly = new ArrayList<>();
 
     public UploadField() {
@@ -138,39 +138,41 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     public void setStorageMode(StorageMode mode) {
         if (receiver == null || storageMode != mode) {
             switch (mode) {
-            case MEMORY:
-                if (getFieldType() == FieldType.FILE) {
-                    throw new IllegalArgumentException(
-                            "Storage mode cannot be memory if fields type is File!");
-                }
-                receiver = new MemoryBuffer();
-                break;
-            default:
-                receiver = new FileBuffer() {
-                    @Override
-                    public FileFactory getFileFactory() {
-                        return UploadField.this.getFileFactory();
+                case MEMORY:
+                    if (getFieldType() == FieldType.FILE) {
+                        throw new IllegalArgumentException(
+                                "Storage mode cannot be memory if fields type is File!");
                     }
+                    receiver = new MemoryBuffer();
+                    break;
+                default:
+                    receiver = new FileBuffer() {
+                        @Override
+                        public FileFactory getFileFactory() {
+                            return UploadField.this.getFileFactory();
+                        }
 
-                    @Override
-                    public FieldType getFieldType() {
-                        return UploadField.this.getFieldType();
+                        @Override
+                        public FieldType getFieldType() {
+                            return UploadField.this.getFieldType();
+                        }
+
+                        ;
+
+                @Override
+                        public void setLastMimeType(String mimeType) {
+                            // this now appears to be called
+                            //throw new UnsupportedOperationException("Not supported yet.");
+
+                        }
+
+                        @Override
+                        public void setLastFileName(String fileName) {
+                            // this now appears to be called
+                            //throw new UnsupportedOperationException("Not supported yet.");
+                        }
                     };
-
-                @Override
-                public void setLastMimeType(String mimeType) {
-                    // this now appears to be called
-                    //throw new UnsupportedOperationException("Not supported yet.");
-                    
-                }
-
-                @Override
-                public void setLastFileName(String fileName) {
-                    // this now appears to be called
-                    //throw new UnsupportedOperationException("Not supported yet.");
-                }
-                };
-                break;
+                    break;
             }
             if (upload != null) {
                 upload.setReceiver(receiver);
@@ -194,18 +196,18 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     }
 
     /**
-	 */
+     */
     public enum FieldType {
         UTF8_STRING, BYTE_ARRAY, FILE;
 
         public Class<?> getRawType() {
             switch (this) {
-            case FILE:
-                return File.class;
-            case UTF8_STRING:
-                return String.class;
-            default:
-                return Byte[].class;
+                case FILE:
+                    return File.class;
+                case UTF8_STRING:
+                    return String.class;
+                default:
+                    return Byte[].class;
             }
         }
     }
@@ -230,6 +232,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     }
 
     public class MemoryBuffer implements UploadFieldReceiver {
+
         ByteArrayOutputStream outputBuffer = null;
 
         String mimeType;
@@ -255,7 +258,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
                 return null;
             }
             if (outputBuffer.size() == 0) {
-            	return null;
+                return null;
             }
             byte[] byteArray = outputBuffer.toByteArray();
             if (getFieldType() == FieldType.BYTE_ARRAY) {
@@ -279,26 +282,26 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             if (newValue != null) {
                 FieldType fieldType2 = getFieldType();
                 switch (fieldType2) {
-                case BYTE_ARRAY:
-                    byte[] newValueBytes = (byte[]) newValue;
-                    try {
-                        outputBuffer.write(newValueBytes);
-                    } catch (IOException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
-                    break;
-                case UTF8_STRING:
-                    try {
-                        String newValueStr = (String) newValue;
-                        outputBuffer.write(newValueStr.getBytes());
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    break;
-                default:
-                    throw new IllegalStateException();
+                    case BYTE_ARRAY:
+                        byte[] newValueBytes = (byte[]) newValue;
+                        try {
+                            outputBuffer.write(newValueBytes);
+                        } catch (IOException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        }
+                        break;
+                    case UTF8_STRING:
+                        try {
+                            String newValueStr = (String) newValue;
+                            outputBuffer.write(newValueStr.getBytes());
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException();
                 }
             }
         }
@@ -450,9 +453,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      */
     protected String getDisplayDetails() {
         StringBuilder sb = new StringBuilder();
-        if(getFieldType() == FieldType.FILE) {
-        sb.append("File: ");
-        sb.append(lastFileName);
+        if (getFieldType() == FieldType.FILE) {
+            sb.append("File: ");
+            sb.append(lastFileName);
             sb.append("</br> ");
         }
         sb.append("<em>");
@@ -497,7 +500,6 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     private boolean fileDeletesAllowed = true;
 
     // FIELD RELATED FIELDS
-
     /**
      * Connected data-source.
      */
@@ -560,7 +562,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
         try {
             VALUE_CHANGE_METHOD = Property.ValueChangeListener.class
                     .getDeclaredMethod("valueChange",
-                            new Class[] { Property.ValueChangeEvent.class });
+                            new Class[]{Property.ValueChangeEvent.class});
         } catch (final java.lang.NoSuchMethodException e) {
             // This should never happen
             throw new java.lang.RuntimeException(
@@ -572,6 +574,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * Adds a value change listener for the field. Don't add a JavaDoc comment
      * here, we use the default documentation from the implemented interface.
      */
+    @Override
     public void addListener(Property.ValueChangeListener listener) {
         addListener(AbstractField.ValueChangeEvent.class, listener,
                 VALUE_CHANGE_METHOD);
@@ -587,7 +590,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
                 VALUE_CHANGE_METHOD);
     }
 
-    /**
+    /*
      * Emits the value change event. The value contained in the field is
      * validated before the event is created.
      */
@@ -601,11 +604,11 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     /**
      * This method listens to data source value changes and passes the changes
      * forwards.
-     * 
-     * @param event
-     *            the value change event telling the data source contents have
-     *            changed.
+     *
+     * @param event the value change event telling the data source contents have
+     * changed.
      */
+    @Override
     public void valueChange(Property.ValueChangeEvent event) {
         // if (isReadThrough() || !isModified()) {
         // fireValueChange(false);
@@ -641,39 +644,40 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     /**
      * Is this field required. Required fields must filled by the user.
-     * 
+     *
      * If the field is required, it is visually indicated in the user interface.
      * Furthermore, setting field to be required implicitly adds "non-empty"
      * validator and thus isValid() == false or any isEmpty() fields. In those
      * cases validation errors are not painted as it is obvious that the user
      * must fill in the required fields.
-     * 
+     *
      * On the other hand, for the non-required fields isValid() == true if the
      * field isEmpty() regardless of any attached validators.
-     * 
-     * 
+     *
+     *
      * @return <code>true</code> if the field is required .otherwise
-     *         <code>false</code>.
+     * <code>false</code>.
      */
+    @Override
     public boolean isRequired() {
         return required;
     }
 
     /**
      * Sets the field required. Required fields must filled by the user.
-     * 
+     *
      * If the field is required, it is visually indicated in the user interface.
      * Furthermore, setting field to be required implicitly adds "non-empty"
      * validator and thus isValid() == false or any isEmpty() fields. In those
      * cases validation errors are not painted as it is obvious that the user
      * must fill in the required fields.
-     * 
+     *
      * On the other hand, for the non-required fields isValid() == true if the
      * field isEmpty() regardless of any attached validators.
-     * 
-     * @param required
-     *            Is the field required.
+     *
+     * @param required Is the field required.
      */
+    @Override
     public void setRequired(boolean required) {
         this.required = required;
         requestRepaint();
@@ -684,10 +688,11 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * setting requiredMessage to be "" or null, no error pop-up or exclamation
      * mark is shown for a empty required field. This faults to "". Even in
      * those cases isValid() returns false for empty required fields.
-     * 
-     * @param requiredMessage
-     *            Message to be shown when this field is required, but empty.
+     *
+     * @param requiredMessage Message to be shown when this field is required,
+     * but empty.
      */
+    @Override
     public void setRequiredError(String requiredMessage) {
         requiredError = requiredMessage;
         requestRepaint();
@@ -698,28 +703,28 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * 
      * @see com.vaadin.ui.Field#getRequiredError()
      */
+    @Override
     public String getRequiredError() {
         return requiredError;
     }
 
     /**
-     * Is the field empty?
-     * 
-     * In general, "empty" state is same as null..
+     * @return true if field is empty
      */
+    @Override
     public boolean isEmpty() {
         return receiver.isEmpty();
     }
 
     /**
      * Is automatic, visible validation enabled?
-     * 
+     *
      * If automatic validation is enabled, any validators connected to this
      * component are evaluated while painting the component and potential error
      * messages are sent to client. If the automatic validation is turned off,
      * isValid() and validate() methods still work, but one must show the
      * validation in their own code.
-     * 
+     *
      * @return True, if automatic validation is enabled.
      */
     public boolean isValidationVisible() {
@@ -728,15 +733,14 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     /**
      * Enable or disable automatic, visible validation.
-     * 
+     *
      * If automatic validation is enabled, any validators connected to this
      * component are evaluated while painting the component and potential error
      * messages are sent to client. If the automatic validation is turned off,
      * isValid() and validate() methods still work, but one must show the
      * validation in their own code.
-     * 
-     * @param validateAutomatically
-     *            True, if automatic validation is enabled.
+     *
+     * @param validateAutomatically True, if automatic validation is enabled.
      */
     public void setValidationVisible(boolean validateAutomatically) {
         if (validationVisible != validateAutomatically) {
@@ -887,6 +891,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     }
 
     private boolean readOnly = false;
+
     @Override
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
@@ -908,7 +913,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
             } catch (InvocationTargetException ex) {
                 Logger.getLogger(UploadField.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
         }
     }
 
@@ -922,6 +927,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * 
      * @see com.vaadin.data.Validatable#addValidator(com.vaadin.data.Validator)
      */
+    @Override
     public void addValidator(Validator validator) {
         if (validators == null) {
             validators = new LinkedList<Validator>();
@@ -932,10 +938,11 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     /**
      * Gets the validators of the field.
-     * 
+     *
      * @return the Unmodifiable collection that holds all validators for the
-     *         field.
+     * field.
      */
+    @Override
     public Collection<Validator> getValidators() {
         if (validators == null || validators.isEmpty()) {
             return null;
@@ -945,10 +952,10 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     /**
      * Removes the validator from the field.
-     * 
-     * @param validator
-     *            the validator to remove.
+     *
+     * @param validator the validator to remove.
      */
+    @Override
     public void removeValidator(Validator validator) {
         if (validators != null) {
             validators.remove(validator);
@@ -958,10 +965,11 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     /**
      * Tests the current value against all registered validators.
-     * 
+     *
      * @return <code>true</code> if all registered validators claim that the
-     *         current value is valid, <code>false</code> otherwise.
+     * current value is valid, <code>false</code> otherwise.
      */
+    @Override
     public boolean isValid() {
 
         if (isEmpty()) {
@@ -987,13 +995,14 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     /**
      * Checks the validity of the Validatable by validating the field with all
      * attached validators.
-     * 
+     *
      * The "required" validation is a built-in validation feature. If the field
      * is required, but empty, validation will throw an EmptyValueException with
      * the error message set with setRequiredError().
-     * 
-     * @see com.vaadin.data.Validatable#validate()
+     *
+     * @see com.vaadin.v7.data.Validatable#validate()
      */
+    @Override
     public void validate() throws Validator.InvalidValueException {
 
         if (isEmpty()) {
@@ -1056,10 +1065,11 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     /**
      * Fields allow invalid values by default. In most cases this is wanted,
      * because the field otherwise visually forget the user input immediately.
-     * 
+     *
      * @return true iff the invalid values are allowed.
-     * @see com.vaadin.data.Validatable#isInvalidAllowed()
+     * @see com.vaadin.v7.data.Validatable#isInvalidAllowed()
      */
+    @Override
     public boolean isInvalidAllowed() {
         return invalidAllowed;
     }
@@ -1074,8 +1084,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * values. The validators are automatically copied to the field when the
      * datasource is set.
      * </p>
-     * 
-     * @see com.vaadin.data.Validatable#setInvalidAllowed(boolean)
+     *
+     * @param invalidAllowed true if invalid values should be allowed
+     * @see com.vaadin.v7.data.Validatable#setInvalidAllowed(boolean)
      */
     public void setInvalidAllowed(boolean invalidAllowed)
             throws UnsupportedOperationException {
@@ -1088,7 +1099,7 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * uncommitted changes to the field are discarded and the value is refreshed
      * from the new data source.
      * </p>
-     * 
+     *
      * <p>
      * If the datasource has any validators, the same validators are added to
      * the field. Because the default behavior of the field is to allow invalid
@@ -1097,10 +1108,10 @@ public class UploadField extends CssLayout implements Field, StartedListener,
      * is invalid. After the value is valid, the error message is not shown and
      * the commit can be done normally.
      * </p>
-     * 
-     * @param newDataSource
-     *            the new data source Property.
+     *
+     * @param newDataSource the new data source Property.
      */
+    @Override
     public void setPropertyDataSource(Property newDataSource) {
 
         // Stops listening the old data source changes
@@ -1214,16 +1225,14 @@ public class UploadField extends CssLayout implements Field, StartedListener,
     }
 
     /**
-     * @see {@link Html5FileInputSettings#setAcceptFilter(String)}
-     * @param acceptString
+     * @param acceptString the accept filter
      */
     public void setAcceptFilter(String acceptString) {
         getHtml5FileInputSettings().setAcceptFilter(acceptString);
     }
 
     /**
-     * @see {@link Html5FileInputSettings#setMaxFileSize(Integer)}
-     * @param maxFileSize
+     * @param maxFileSize the maximum file size to accept
      */
     public void setMaxFileSize(int maxFileSize) {
         getHtml5FileInputSettings().setMaxFileSize(maxFileSize);
@@ -1235,8 +1244,9 @@ public class UploadField extends CssLayout implements Field, StartedListener,
 
     /**
      * If set to true, the uploaded file is displayed within the component.
-     * 
-     * @param displayUpload
+     *
+     * @param displayUpload true if the uploaded file is displayed within the
+     * component
      */
     public void setDisplayUpload(boolean displayUpload) {
         this.displayUpload = displayUpload;

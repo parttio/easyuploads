@@ -40,7 +40,7 @@ public class Html5FileInputSettings extends AbstractExtension {
 	 * by the client side and not supported by all browsers. Note that using
 	 * this method does not invalidate need for server side checks.
 	 * 
-	 * @param maxSize
+	 * @param maxSize the max file size
 	 */
 	public void setMaxFileSize(Integer maxSize) {
 		getState().maxSize = maxSize;
@@ -55,7 +55,7 @@ public class Html5FileInputSettings extends AbstractExtension {
 	 * 
 	 * See https://developer.mozilla.org/en-US/docs/HTML/Element/Input
 	 * 
-	 * @param accept
+	 * @param accept the accept filter
 	 */
 	public void setAcceptFilter(String accept) {
 		getState().accept = accept;
@@ -64,7 +64,7 @@ public class Html5FileInputSettings extends AbstractExtension {
         /**
          * Sets the maximum file count that should be accepted.
          * 
-         * @param maxCount
+         * @param maxCount the max number files that can be uploaded
          */
         public void setMaxFileCount(Integer maxCount) {
                 getState().maxFileCount = maxCount;

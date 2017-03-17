@@ -60,9 +60,6 @@ public class Html5FileInputSettingsConnector extends AbstractExtensionConnector 
 	public interface HasFileUpload {
 	        public FileUpload getFileUpload();
 
-	        /**
-	         * @see {@link InputElement#setAccept(String)}</a>
-	         */
 	        public void setAccept(String accept);
 
 	        public void setMaxSize(Integer maxSize);

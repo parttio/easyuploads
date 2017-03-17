@@ -33,6 +33,9 @@ public abstract class FileBuffer implements UploadFieldReceiver {
     }
 
     /**
+     * @param filename the name of the uploaded file
+     * @param MIMEType the mime type of the uploaded file
+     * @return the Output stream to the content should be streamed to
      * @see com.vaadin.ui.Upload.Receiver#receiveUpload(String, String)
      */
     public OutputStream receiveUpload(String filename, String MIMEType) {
@@ -51,6 +54,7 @@ public abstract class FileBuffer implements UploadFieldReceiver {
     /**
      * Helper method for UploadField.
      * 
+     * @return file or content depending on the configuration
      * @see org.vaadin.easyuploads.UploadFieldReceiver#getValue()
      */
     public Object getValue() {
@@ -79,7 +83,7 @@ public abstract class FileBuffer implements UploadFieldReceiver {
         }
     }
 
-    /**
+    /*
      * contains default impelmentation to allow usage of this class elsewhere
      * (lazy programmer don't have proper class heirarchy...)
      */

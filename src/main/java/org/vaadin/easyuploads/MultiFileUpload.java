@@ -57,7 +57,7 @@ import com.vaadin.ui.VerticalLayout;
  * Developer handles uploaded files by implementing the abstract
  * {@link #handleFile(File, String, String, long)} method.
  * <p>
- * TODO Field version (type == Collection<File> or File where isDirectory() ==
+ * TODO Field version (type == Collection File or File where isDirectory() ==
  * true).
  * <p>
  * TODO a super progress indicator (total transferred per total, including
@@ -467,8 +467,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     }
 
     /**
-     * @see {@link Html5FileInputSettings#setAcceptFilter(String)}
-     * @param acceptString
+     * @param acceptString the accept filter
      */
     public void setAcceptFilter(String acceptString) {
         this.acceptString = acceptString;
@@ -493,8 +492,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     }
 
     /**
-     * @see {@link Html5FileInputSettings#setMaxFileSize(Integer)}
-     * @param maxFileSize
+     * @param maxFileSize the maximum file size
      */
     public void setMaxFileSize(int maxFileSize) {
         this.maxFileSize = maxFileSize;
