@@ -280,7 +280,11 @@ public class UploadField extends CssLayout implements Field, StartedListener,
                 FieldType fieldType2 = getFieldType();
                 switch (fieldType2) {
                 case BYTE_ARRAY:
-                    byte[] newValueBytes = (byte[]) newValue;
+                    byte[] newValueBytes;
+                    if(newValue != null)
+                        newValueBytes = (byte[]) newValue;
+                    else
+                        newValueBytes = new byte[0];
                     try {
                         outputBuffer.write(newValueBytes);
                     } catch (IOException e1) {
