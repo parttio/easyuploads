@@ -32,7 +32,7 @@ import javax.imageio.ImageIO;
  * A simple field to edit images stored as byte arrays (e.g. in database).
  */
 public class ImagePreviewField extends UploadField {
-    
+
     public ImagePreviewField() {
         setAcceptFilter("image/*");
         setFieldType(FieldType.BYTE_ARRAY);
@@ -51,12 +51,12 @@ public class ImagePreviewField extends UploadField {
         try {
             Image image = (Image) display;
             // check if upload is an image
-            if (ImageIO.read(new ByteArrayInputStream((byte[]) getValue())) != null) {
+            if (ImageIO.read(new ByteArrayInputStream(getValue())) != null) {
                 // Update the image according to
                 // https://vaadin.com/book/vaadin7/-/page/components.embedded.html
                 SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
                 String filename = df.format(new Date()) + getLastFileName();
-                StreamResource resource = new StreamResource(new ImageSource((byte[]) getValue()), filename);
+                StreamResource resource = new StreamResource(new ImageSource(getValue()), filename);
                 resource.setCacheTime(0);
                 image.setSource(resource);
             } else {
@@ -98,5 +98,5 @@ public class ImagePreviewField extends UploadField {
             return new ByteArrayInputStream(buffer);
         }
     }
-    
+
 }

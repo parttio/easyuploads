@@ -32,10 +32,10 @@ import com.vaadin.ui.Upload.StartedListener;
  * component in core Vaadin. Instead of implementing own {@link Receiver}
  * developer can just access the contents of the file or the {@link File} where
  * the contents was streamed to. In addition to easier access to the content,
- * UploadField also provides built in {@link ProgressIndicator} and displays
+ * UploadField also provides built in {@link } and displays
  * (partly) the uploaded file. What/how is displayed can be easily modified by
  * overriding {@link #updateDisplay()} method.
- * 
+ *
  * <p>
  * UploadField can also be used in a form to edit a property - that's where the
  * name Field comes from. Property can be of type (set with
@@ -57,19 +57,19 @@ import com.vaadin.ui.Upload.StartedListener;
  * {@link StorageMode#MEMORY} mode keeps everything in memory. If the Field is
  * in {@link StorageMode#FILE} mode, the file creation can be controlled with
  * {@link #setFileFactory(FileFactory)}.
- * 
+ *
  * <p>
  * Limitations:
  * <ul>
  * <li>Read through modes are not supported properly.
  * <li> {@link StorageMode#FILE} does not support Buffered properly(?).
  * </ul>
- * 
+ *
  * @author Matti Tahvonen
- * 
+ *
  */
 @SuppressWarnings({ "serial" })
-public class UploadField extends CssLayout implements HasValue<Object>, Focusable, StartedListener,
+public class UploadField extends CssLayout implements HasValue<byte[]>, Focusable, StartedListener,
         FinishedListener, ProgressListener {
     private static final int MAX_SHOWN_BYTES = 5;
 
@@ -98,14 +98,14 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
         display = createDisplayComponent();
         buildDefaulLayout();
     }
-    
+
     /**
      * @see com.vaadin.ui.AbstractComponent#setReadOnly(boolean)
      * @see com.vaadin.data.HasValue#setReadOnly(boolean)
      */
     @Override
     public void setReadOnly(boolean readOnly) {
-    	super.setReadOnly(readOnly);
+        super.setReadOnly(readOnly);
     }
 
     /**
@@ -114,9 +114,9 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
      */
     @Override
     public boolean isReadOnly() {
-    	return super.isReadOnly();
+        return super.isReadOnly();
     }
-    
+
     public void setButtonCaption(String caption) {
         upload.setButtonCaption(caption);
     }
@@ -138,36 +138,41 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
     public void setStorageMode(StorageMode mode) {
         if (receiver == null || storageMode != mode) {
             switch (mode) {
-            case MEMORY:
-                if (getFieldType() == FieldType.FILE) {
-                    throw new IllegalArgumentException(
-                            "Storage mode cannot be memory if fields type is File!");
-                }
-                receiver = new MemoryBuffer();
-                break;
-            default:
-                receiver = new FileBuffer() {
-                    @Override
-                    public FileFactory getFileFactory() {
-                        return UploadField.this.getFileFactory();
+                case MEMORY:
+                    if (getFieldType() == FieldType.FILE) {
+                        throw new IllegalArgumentException(
+                                "Storage mode cannot be memory if fields type is File!");
                     }
+                    receiver = new MemoryBuffer();
+                    break;
+                default:
+                    receiver = new FileBuffer() {
+                        @Override
+                        public FileFactory getFileFactory() {
+                            return UploadField.this.getFileFactory();
+                        }
 
-                    @Override
-                    public FieldType getFieldType() {
-                        return UploadField.this.getFieldType();
+                        @Override
+                        public FieldType getFieldType() {
+                            return UploadField.this.getFieldType();
+                        };
+
+                        @Override
+                        public void setValue(byte[] newValue) {
+                            UploadField.this.setValue(newValue);
+                        }
+
+                        @Override
+                        public void setLastMimeType(String mimeType) {
+                            throw new UnsupportedOperationException("Not supported yet.");
+                        }
+
+                        @Override
+                        public void setLastFileName(String fileName) {
+                            throw new UnsupportedOperationException("Not supported yet.");
+                        }
                     };
-
-                @Override
-                public void setLastMimeType(String mimeType) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-
-                @Override
-                public void setLastFileName(String fileName) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-                };
-                break;
+                    break;
             }
             if (upload != null) {
                 upload.setReceiver(receiver);
@@ -191,18 +196,18 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
     }
 
     /**
-	 */
+     */
     public enum FieldType {
         UTF8_STRING, BYTE_ARRAY, FILE;
 
         public Class<?> getRawType() {
             switch (this) {
-            case FILE:
-                return File.class;
-            case UTF8_STRING:
-                return String.class;
-            default:
-                return Byte[].class;
+                case FILE:
+                    return File.class;
+                case UTF8_STRING:
+                    return String.class;
+                default:
+                    return Byte[].class;
             }
         }
     }
@@ -237,7 +242,7 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
          * @see com.vaadin.ui.Upload.Receiver#receiveUpload(String, String)
          */
         @Override
-		public OutputStream receiveUpload(String filename, String MIMEType) {
+        public OutputStream receiveUpload(String filename, String MIMEType) {
             fileName = filename;
             mimeType = MIMEType;
             outputBuffer = new ByteArrayOutputStream();
@@ -245,23 +250,26 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
         }
 
         @Override
-		public Object getValue() {
+        public byte[] getValue() {
             if (outputBuffer == null) {
                 return null;
             }
             if (outputBuffer.size() == 0) {
-            	return null;
+                return null;
             }
             byte[] byteArray = outputBuffer.toByteArray();
             if (getFieldType() == FieldType.BYTE_ARRAY) {
                 return byteArray;
-            } else {
-                return new String(byteArray);
-            }
+            }else return null;
+//            } else {
+//                return new String(byteArray);
+//            }
+
+
         }
 
         @Override
-		public InputStream getContentAsStream() {
+        public InputStream getContentAsStream() {
             byte[] byteArray = outputBuffer.toByteArray();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
                     byteArray);
@@ -269,33 +277,33 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
         }
 
         @Override
-		public void setValue(Object newValue) {
+        public void setValue(byte[] newValue) {
             mimeType = null;
             fileName = null;
             outputBuffer = new ByteArrayOutputStream();
             if (newValue != null) {
                 FieldType fieldType2 = getFieldType();
                 switch (fieldType2) {
-                case BYTE_ARRAY:
-                    byte[] newValueBytes = (byte[]) newValue;
-                    try {
-                        outputBuffer.write(newValueBytes);
-                    } catch (IOException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
-                    break;
-                case UTF8_STRING:
-                    try {
-                        String newValueStr = (String) newValue;
-                        outputBuffer.write(newValueStr.getBytes());
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    break;
-                default:
-                    throw new IllegalStateException();
+                    case BYTE_ARRAY:
+                        byte[] newValueBytes = (byte[]) newValue;
+                        try {
+                            outputBuffer.write(newValueBytes);
+                        } catch (IOException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        }
+                        break;
+//                case UTF8_STRING:
+//                    try {
+//                        String newValueStr = (String) newValue;
+//                        outputBuffer.write(newValueStr.getBytes());
+//                    } catch (IOException e) {
+//                        // TODO Auto-generated catch block
+//                        e.printStackTrace();
+//                    }
+//                    break;
+                    default:
+                        throw new IllegalStateException();
                 }
             }
         }
@@ -351,13 +359,13 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
     }
 
     @Override
-	public void setValue(Object newValue) {
+    public void setValue(byte[] newValue) {
         receiver.setValue(newValue);
         fireValueChange();
     }
 
     @Override
-	public Object getValue() {
+    public byte[] getValue() {
         return receiver.getValue();
     }
 
@@ -366,13 +374,13 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
     }
 
     @Override
-	public void uploadStarted(StartedEvent event) {
+    public void uploadStarted(StartedEvent event) {
         progress.setVisible(true);
         progress.setValue(0f);
     }
 
     @Override
-	public void uploadFinished(FinishedEvent event) {
+    public void uploadFinished(FinishedEvent event) {
         progress.setVisible(false);
         lastFileName = event.getFilename();
         updateDisplay();
@@ -380,7 +388,7 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
     }
 
     protected void fireValueChange() {
-        fireValueChange(true);
+        fireValueChange(false);
     }
 
     @Override
@@ -402,7 +410,7 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
     }
 
     protected void updateDisplayComponent() {
-        ((Label) display).setValue(getDisplayDetails());
+//        ((Label) display).setValue(getDisplayDetails());
         if (display.getParent() == null) {
             getRootLayout().addComponent(display);
         }
@@ -411,13 +419,13 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
     /**
      * Adds file delete button, if file deletes are allowed.
      */
-    protected void addDeleteButton() {
+    protected void  addDeleteButton() {
         if (isFileDeletesAllowed()) {
             if (deleteButton == null) {
                 deleteButton = new Button(getDeleteCaption());
                 deleteButton.addClickListener(new Button.ClickListener() {
                     @Override
-					public void buttonClick(ClickEvent arg0) {
+                    public void buttonClick(ClickEvent arg0) {
                         setValue(null);
                         getRootLayout().removeComponent(arg0.getButton());
                         updateDisplay();
@@ -446,12 +454,12 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
     protected String getDisplayDetails() {
         StringBuilder sb = new StringBuilder();
         if(getFieldType() == FieldType.FILE) {
-        sb.append("File: ");
-        sb.append(StringEscapeUtils.escapeXml11(lastFileName));
+            sb.append("File: ");
+            sb.append(StringEscapeUtils.escapeXml11(lastFileName));
             sb.append("</br> ");
         }
         sb.append("<em>");
-        Object value = getValue();
+        byte[] value = getValue();
         if (getFieldType() == FieldType.BYTE_ARRAY) {
             byte[] ba = (byte[]) value;
             int shownBytes = MAX_SHOWN_BYTES;
@@ -478,7 +486,7 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
     }
 
     @Override
-	public void updateProgress(long readBytes, long contentLength) {
+    public void updateProgress(long readBytes, long contentLength) {
         progress.setValue((float) readBytes / contentLength);
     }
 
@@ -523,7 +531,7 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
      * here, we use the default documentation from the implemented interface.
      */
     @Override
-	public Registration addValueChangeListener(HasValue.ValueChangeListener listener) {
+    public Registration addValueChangeListener(HasValue.ValueChangeListener listener) {
         return addListener(HasValue.ValueChangeEvent.class, listener,
                 VALUE_CHANGE_METHOD);
     }
@@ -536,6 +544,7 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
         fireEvent(new HasValue.ValueChangeEvent(this, this, null, ! repaintIsNotNeeded));
         if (!repaintIsNotNeeded) {
             requestRepaint();
+            updateDisplay();
         }
     }
 
@@ -545,7 +554,7 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
      * @see com.vaadin.ui.Component.Focusable#focus()
      */
     @Override
-	public void focus() {
+    public void focus() {
         upload.focus();
     }
 
@@ -555,7 +564,7 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
      * @see com.vaadin.ui.Component.Focusable#getTabIndex()
      */
     @Override
-	public int getTabIndex() {
+    public int getTabIndex() {
         return tabIndex;
     }
 
@@ -565,23 +574,23 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
      * @see com.vaadin.ui.Component.Focusable#setTabIndex(int)
      */
     @Override
-	public void setTabIndex(int tabIndex) {
+    public void setTabIndex(int tabIndex) {
         this.tabIndex = tabIndex;
     }
 
     /**
      * Is this field required. Required fields must filled by the user.
-     * 
+     *
      * If the field is required, it is visually indicated in the user interface.
      * Furthermore, setting field to be required implicitly adds "non-empty"
      * validator and thus isValid() == false or any isEmpty() fields. In those
      * cases validation errors are not painted as it is obvious that the user
      * must fill in the required fields.
-     * 
+     *
      * On the other hand, for the non-required fields isValid() == true if the
      * field isEmpty() regardless of any attached validators.
-     * 
-     * 
+     *
+     *
      * @return <code>true</code> if the field is required .otherwise
      *         <code>false</code>.
      */
@@ -592,42 +601,42 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
 
     /**
      * Sets the field required. Required fields must filled by the user.
-     * 
+     *
      * If the field is required, it is visually indicated in the user interface.
      * Furthermore, setting field to be required implicitly adds "non-empty"
      * validator and thus isValid() == false or any isEmpty() fields. In those
      * cases validation errors are not painted as it is obvious that the user
      * must fill in the required fields.
-     * 
+     *
      * On the other hand, for the non-required fields isValid() == true if the
      * field isEmpty() regardless of any attached validators.
-     * 
+     *
      * @param required
      *            Is the field required.
      */
     @Override
-	public void setRequiredIndicatorVisible(boolean required) {
+    public void setRequiredIndicatorVisible(boolean required) {
         this.required = required;
         requestRepaint();
     }
 
     /**
      * Is the field empty?
-     * 
+     *
      * In general, "empty" state is same as null..
      */
     @Override
-	public boolean isEmpty() {
+    public boolean isEmpty() {
         return receiver.isEmpty();
     }
 
     /**
      * Tests the current value against all registered validators.
-     * 
+     *
      * @return <code>true</code> if all registered validators claim that the
      *         current value is valid, <code>false</code> otherwise.
      */
-	public boolean isValid() {
+    public boolean isValid() {
 
         if (isEmpty()) {
             if (isRequiredIndicatorVisible()) {
@@ -683,7 +692,7 @@ public class UploadField extends CssLayout implements HasValue<Object>, Focusabl
 
     /**
      * If set to true, the uploaded file is displayed within the component.
-     * 
+     *
      * @param displayUpload
      */
     public void setDisplayUpload(boolean displayUpload) {

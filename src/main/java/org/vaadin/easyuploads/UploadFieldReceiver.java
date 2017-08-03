@@ -5,21 +5,22 @@ import java.io.InputStream;
 import com.vaadin.ui.Upload.Receiver;
 
 interface UploadFieldReceiver extends Receiver {
-	Object getValue();
+
+	byte[] getValue();
 
 	InputStream getContentAsStream();
 
-	void setValue(Object newValue);
+	void setValue(byte[] newValue);
 
 	boolean isEmpty();
 
 	long getLastFileSize();
 
 	String getLastMimeType();
-        
-        void setLastMimeType(String mimeType);
+
+	void setLastMimeType(String mimeType);
 
 	String getLastFileName();
-        
-        void setLastFileName(String fileName);
+
+	void setLastFileName(String fileName);
 }

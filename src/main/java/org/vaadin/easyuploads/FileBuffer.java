@@ -50,17 +50,17 @@ public abstract class FileBuffer implements UploadFieldReceiver {
 
     /**
      * Helper method for UploadField.
-     * 
+     *
      * @see org.vaadin.easyuploads.UploadFieldReceiver#getValue()
      */
-    public Object getValue() {
+    public byte[] getValue() {
         if (file == null || !file.exists()) {
             return null;
         }
 
-        if (getFieldType() == FieldType.FILE) {
-            return file;
-        }
+//        if (getFieldType() == FieldType.FILE) {
+//            return file;
+//        }
 
         InputStream valueAsStream = getContentAsStream();
 
@@ -72,7 +72,7 @@ public abstract class FileBuffer implements UploadFieldReceiver {
             if (getFieldType() == FieldType.BYTE_ARRAY) {
                 return byteArray;
             } else {
-                return new String(byteArray);
+                return null;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

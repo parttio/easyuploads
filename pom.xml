@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.vaadin.addon</groupId>
     <artifactId>easyuploads</artifactId>
-    <version>8.0.2-SNAPSHOT</version>
+    <version>8.0.3-SNAPSHOT</version>
     <name>EasyUploads</name>
 
     <organization>
@@ -33,7 +33,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.version>8.0.2</vaadin.version>
+        <vaadin.version>8.1.0</vaadin.version>
     </properties>
 
     <build>

@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.vaadin.easyuploads.MultiUpload.FileDetail;
 import org.vaadin.easyuploads.UploadField.FieldType;
 import org.vaadin.easyuploads.client.AcceptUtil;
@@ -123,7 +124,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             private LinkedList<ProgressBar> indicators;
 
             @Override
-			public void streamingStarted(StreamingStartEvent event) {
+            public void streamingStarted(StreamingStartEvent event) {
                 if (maxFileSize > 0 && event.getContentLength() > maxFileSize) {
                     throw new MaxFileSizeExceededException(
                             event.getContentLength(), maxFileSize);
@@ -131,7 +132,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             }
 
             @Override
-			public void streamingFinished(StreamingEndEvent event) {
+            public void streamingFinished(StreamingEndEvent event) {
                 if (!indicators.isEmpty()) {
                     getprogressBarsLayout()
                             .removeComponent(indicators.remove(0));
@@ -148,7 +149,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             }
 
             @Override
-			public void streamingFailed(StreamingErrorEvent event) {
+            public void streamingFailed(StreamingErrorEvent event) {
                 Logger.getLogger(getClass().getName()).log(Level.FINE,
                         "Streaming failed", event.getException());
 
@@ -160,7 +161,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             }
 
             @Override
-			public void onProgress(StreamingProgressEvent event) {
+            public void onProgress(StreamingProgressEvent event) {
                 long readBytes = event.getBytesReceived();
                 long contentLength = event.getContentLength();
                 float f = (float) readBytes / (float) contentLength;
@@ -168,7 +169,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             }
 
             @Override
-			public OutputStream getOutputStream() {
+            public OutputStream getOutputStream() {
                 FileDetail next = upload.getPendingFileNames().iterator()
                         .next();
                 return receiver.receiveUpload(next.getFileName(),
@@ -176,7 +177,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             }
 
             @Override
-			public void filesQueued(Collection<FileDetail> pendingFileNames) {
+            public void filesQueued(Collection<FileDetail> pendingFileNames) {
                 if (indicators == null) {
                     indicators = new LinkedList<ProgressBar>();
                 }
@@ -273,6 +274,12 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             }
 
             @Override
+            public void setValue(byte[] newValue) {
+                //TODO: complete setValue when you want to use MultiFileUpload
+                throw new NotImplementedException("Not implemented, TODO");
+            }
+
+            @Override
             public void setLastMimeType(String mimeType) {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
@@ -339,7 +346,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     }
 
     abstract protected void handleFile(File file, String fileName,
-            String mimeType, long length);
+                                       String mimeType, long length);
 
     /**
      * A helper method to set DirectoryFileFactory with given pathname as
@@ -354,7 +361,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     }
 
     @Override
-	public AcceptCriterion getAcceptCriterion() {
+    public AcceptCriterion getAcceptCriterion() {
         // TODO accept only files
         // return new And(new TargetDetailIs("verticalLocation","MIDDLE"), new
         // TargetDetailIs("horizontalLoction", "MIDDLE"));
@@ -362,7 +369,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     }
 
     @Override
-	public void drop(DragAndDropEvent event) {
+    public void drop(DragAndDropEvent event) {
         DragAndDropWrapper.WrapperTransferable transferable = (WrapperTransferable) event
                 .getTransferable();
         Html5File[] files = transferable.getFiles();
@@ -395,31 +402,31 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 private String mime;
 
                 @Override
-				public OutputStream getOutputStream() {
+                public OutputStream getOutputStream() {
                     return receiver.receiveUpload(name, mime);
                 }
 
                 @Override
-				public boolean listenProgress() {
+                public boolean listenProgress() {
                     return true;
                 }
 
                 @Override
-				public void onProgress(StreamingProgressEvent event) {
+                public void onProgress(StreamingProgressEvent event) {
                     float p = (float) event.getBytesReceived()
                             / (float) event.getContentLength();
                     pi.setValue(p);
                 }
 
                 @Override
-				public void streamingStarted(StreamingStartEvent event) {
+                public void streamingStarted(StreamingStartEvent event) {
                     name = event.getFileName();
                     mime = event.getMimeType();
 
                 }
 
                 @Override
-				public void streamingFinished(StreamingEndEvent event) {
+                public void streamingFinished(StreamingEndEvent event) {
                     getprogressBarsLayout().removeComponent(pi);
                     handleFile(receiver.getFile(), html5File.getFileName(),
                             html5File.getType(), html5File.getFileSize());
@@ -428,13 +435,13 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
                 }
 
                 @Override
-				public void streamingFailed(StreamingErrorEvent event) {
+                public void streamingFailed(StreamingErrorEvent event) {
                     getprogressBarsLayout().removeComponent(pi);
                     resetPollIntervalIfNecessary();
                 }
 
                 @Override
-				public boolean isInterrupted() {
+                public boolean isInterrupted() {
                     return false;
                 }
             });
@@ -529,7 +536,7 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
             }
         }
     }
-    
+
     public void setMaxFileCount(int maxFileCount) {
         this.maxFileCount = maxFileCount;
         int uploadCount = html5FileInputSettings.entrySet().size();
