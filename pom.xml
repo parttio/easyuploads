@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.vaadin.addon</groupId>
     <artifactId>easyuploads</artifactId>
-    <version>8.0.1</version>
+    <version>8.0.1-SNAPSHOT</version>
     <name>EasyUploads</name>
 
     <organization>
