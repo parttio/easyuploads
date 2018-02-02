@@ -36,7 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.vaadin.viritin.v7.label.RichText;
+import org.vaadin.viritinv7.label.RichText;
 
 /**
  * UploadField is a helper class that uses rather low level {@link Upload}

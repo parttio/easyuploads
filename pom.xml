@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.vaadin.addon</groupId>
     <artifactId>easyuploads</artifactId>
-    <version>8.0.1-SNAPSHOT</version>
+    <version>8.0.1</version>
     <name>EasyUploads</name>
 
     <organization>
@@ -261,8 +261,8 @@
 
         <dependency>
             <groupId>org.vaadin</groupId>
-            <artifactId>viritin</artifactId>
-            <version>2.0.alpha1</version>
+            <artifactId>viritin-v7-compatibility</artifactId>
+            <version>1.0</version>
             <type>jar</type>
         </dependency>
     </dependencies>
