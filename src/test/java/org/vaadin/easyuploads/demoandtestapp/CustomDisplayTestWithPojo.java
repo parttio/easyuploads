@@ -11,8 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.vaadin.addonhelpers.AbstractTest;
-import org.vaadin.viritin.v7.BeanBinder;
-import org.vaadin.viritin.v7.MBeanFieldGroup;
+import org.vaadin.viritinv7.BeanBinder;
+import org.vaadin.viritinv7.MBeanFieldGroup;
 import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
