@@ -52,20 +52,12 @@ import java.io.IOException;
  * uploads.
  * <p>
  * MultiFileUpload always streams straight to files to keep memory consumption
- * low. To temporary files by default, but this can be overridden with
- * {@link #setFileFactory(FileFactory)} (eg. straight to target directory on the
- * server).
+ * low.
  * <p>
  * Developer handles uploaded files by implementing the abstract
- * {@link #handleFile(File, String, String, long)} method.
- * <p>
- * TODO Field version (type == Collection File or File where isDirectory() ==
- * true).
- * <p>
- * TODO a super progress indicator (total transferred per total, including
- * queued files)
- * <p>
- * TODO Time remaining estimates and current transfer rate
+ * {@link #handleFile(File, String, String, long)} method. There developer can either
+ * read the file contents and handle it somehow or move the file to a location in 
+ * filesystem.
  *
  */
 @SuppressWarnings("serial")
