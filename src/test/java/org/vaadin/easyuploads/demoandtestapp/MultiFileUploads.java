@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.vaadin.addonhelpers.AbstractTest;
-import org.vaadin.easyuploads.FileBuffer;
 import org.vaadin.easyuploads.MultiFileUpload;
 
 import com.google.common.io.Files;
@@ -33,7 +32,7 @@ public class MultiFileUploads extends AbstractTest {
         MultiFileUpload multiFileUpload = new MultiFileUpload() {
             @Override
             protected void handleFile(File file, String fileName,
-                                      String mimeType, long length) {
+                    String mimeType, long length) {
                 String msg = fileName + " uploaded. Saved to temp file "
                         + file.getAbsolutePath() + " (size " + length
                         + " bytes)";
@@ -47,7 +46,7 @@ public class MultiFileUploads extends AbstractTest {
         MultiFileUpload multiFileUploadLimited = new MultiFileUpload() {
             @Override
             protected void handleFile(File file, String fileName,
-                                      String mimeType, long length) {
+                    String mimeType, long length) {
                 String msg = fileName + " uploaded. Saved to temp file "
                         + file.getAbsolutePath() + " (size " + length
                         + " bytes)";
@@ -65,23 +64,12 @@ public class MultiFileUploads extends AbstractTest {
         MultiFileUpload multiFileUpload2 = new MultiFileUpload() {
             @Override
             protected void handleFile(File file, String fileName,
-                                      String mimeType, long length) {
+                    String mimeType, long length) {
                 String msg = fileName + " uploaded. Saved to file "
                         + file.getAbsolutePath() + " (size " + length
                         + " bytes)";
 
                 Notification.show(msg);
-            }
-
-            @Override
-            protected FileBuffer createReceiver() {
-                FileBuffer receiver = super.createReceiver();
-                /*
-                 * Make receiver not to delete files after they have been
-                 * handled by #handleFile().
-                 */
-                receiver.setDeleteFiles(false);
-                return receiver;
             }
         };
         multiFileUpload2.setCaption("MultiFileUpload (with root dir)");
@@ -97,7 +85,7 @@ public class MultiFileUploads extends AbstractTest {
         FormLayout maxSizeMultiUploadLayout = new FormLayout();
         maxSizeMultiUploadLayout.setCaption("MultiFileUpload with maxSize");
         mainWindow.addComponent(maxSizeMultiUploadLayout);
-        
+
         final TextField maxSizeField = new TextField();
         maxSizeField.setCaption("Max size : ");
         maxSizeMultiUploadLayout.addComponent(maxSizeField);
@@ -109,8 +97,8 @@ public class MultiFileUploads extends AbstractTest {
                 Notification.show(msg);
             }
         };
-        
-        maxSizeField.addValueChangeListener(e-> {
+
+        maxSizeField.addValueChangeListener(e -> {
             multiFileUpload.setMaxFileSize(Integer.parseInt(e.getValue()));
         });
         maxSizeField.setValue("1048576");
@@ -130,89 +118,34 @@ public class MultiFileUploads extends AbstractTest {
     class SlowMultiFileUpload extends MultiFileUpload {
 
         @Override
-        protected void handleFile(File file, String fileName, String mimeType,
-                                  long length) {
-            String msg = fileName + " uploaded.";
-            Notification.show(msg);
+        protected void handleFile(File tmpFile, String fileName, String mimeType, long length) {
+
         }
 
         @Override
-        protected FileBuffer createReceiver() {
-            return new FileBuffer() {
-//                @Override
-//                public FileFactory getFileFactory() {
-//                    return SlowMultiFileUpload.this.getFileFactory();
-//                }
+        protected OutputStream createOutputStream(File tempFile) throws RuntimeException {
+            final OutputStream receiveUpload = super.createOutputStream(tempFile);
+            OutputStream slow = new OutputStream() {
+                private int slept;
+                private int written;
 
                 @Override
-                public OutputStream receiveUpload(String filename,
-                                                  String MIMEType) {
-                    final OutputStream receiveUpload = super.receiveUpload(
-                            filename, MIMEType);
-                    OutputStream slow = new OutputStream() {
-                        private int slept;
-                        private int written;
-
-                        @Override
-                        public void write(int b) throws IOException {
-                            receiveUpload.write(b);
-                            written++;
-                            if (slept < 60000 && written % 1024 == 0) {
-                                int sleep = 5;
-                                slept += sleep;
-                                try {
-                                    Thread.sleep(sleep);
-                                } catch (InterruptedException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                }
-                            }
+                public void write(int b) throws IOException {
+                    receiveUpload.write(b);
+                    written++;
+                    if (slept < 60000 && written % 1024 == 0) {
+                        int sleep = 5;
+                        slept += sleep;
+                        try {
+                            Thread.sleep(sleep);
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
                         }
-                    };
-                    return slow;
+                    }
                 }
-
-                @Override
-                public void setValue(byte[] newValue) {
-
-                }
-
-                @Override
-                public void setLastMimeType(String mimeType) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public void setLastFileName(String fileName) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public InputStream getContentAsStream() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public boolean isEmpty() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public long getLastFileSize() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public String getLastMimeType() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public String getLastFileName() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
             };
+            return slow;
         }
 
     }

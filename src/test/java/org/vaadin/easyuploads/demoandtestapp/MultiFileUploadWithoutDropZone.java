@@ -15,7 +15,7 @@ public class MultiFileUploadWithoutDropZone extends AbstractTest {
         MultiFileUpload multiFileUpload = new MultiFileUpload() {
             @Override
             protected void handleFile(File file, String fileName, String mimeType, long length) {
-                Notification.show("File receved");
+                Notification.show("File receved " + fileName, Notification.Type.TRAY_NOTIFICATION);
             }
 
             @Override
