@@ -6,7 +6,7 @@ import org.vaadin.easyuploads.*;
 import com.vaadin.ui.*;
 import org.vaadin.addonhelpers.AbstractTest;
 
-public class MultiFileUploadWithoutDropZone extends AbstractTest {
+public class MultiFileUploadWithMaxFiles1 extends AbstractTest {
 
     @Override
     public Component getTestComponent() {
@@ -15,15 +15,11 @@ public class MultiFileUploadWithoutDropZone extends AbstractTest {
         MultiFileUpload multiFileUpload = new MultiFileUpload() {
             @Override
             protected void handleFile(File file, String fileName, String mimeType, long length) {
-                Notification.show("File receved " + fileName, Notification.Type.TRAY_NOTIFICATION);
-            }
-
-            @Override
-            protected boolean supportsFileDrops() {
-                return false;
+                Notification.show("File receved");
             }
             
         };
+        multiFileUpload.setMaxFileCount(1);
         
         multiFileUpload.setUploadButtonCaption("Upload files...");
         

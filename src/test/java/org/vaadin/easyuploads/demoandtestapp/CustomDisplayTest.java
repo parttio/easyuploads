@@ -7,7 +7,6 @@ import java.util.*;
 import javax.imageio.*;
 
 import org.vaadin.easyuploads.*;
-import org.vaadin.easyuploads.UploadField.FieldType;
 
 import com.vaadin.server.*;
 import com.vaadin.ui.*;
@@ -21,7 +20,6 @@ public class CustomDisplayTest extends AbstractTest {
         ImagePreviewField upload = new ImagePreviewField();
         upload.setCaption("Custom prview for images.");
         upload.setAcceptFilter("image/*");
-        upload.setFieldType(FieldType.BYTE_ARRAY);
         layout.addComponent(upload);
         return layout;
     }
@@ -39,7 +37,7 @@ public class CustomDisplayTest extends AbstractTest {
             try {
                 Image image = (Image) display;
                 // check if upload is an image
-                if (ImageIO.read(new ByteArrayInputStream((byte[]) getValue())) != null) {
+                if (getValue() != null && ImageIO.read(new ByteArrayInputStream((byte[]) getValue())) != null) {
                     // Update the image according to
                     // https://vaadin.com/book/vaadin7/-/page/components.embedded.html
                     SimpleDateFormat df = new SimpleDateFormat(
@@ -51,12 +49,6 @@ public class CustomDisplayTest extends AbstractTest {
                     image.setSource(resource);
                 } else {
                     image.setSource(null);
-                    setValue(null);
-                }
-
-                image.markAsDirty();
-                if (display.getParent() == null) {
-                    getRootLayout().addComponent(display);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
