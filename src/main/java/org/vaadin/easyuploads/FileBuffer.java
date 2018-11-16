@@ -10,26 +10,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.vaadin.easyuploads.UploadField.FieldType;
-
 @SuppressWarnings("serial")
 public abstract class FileBuffer implements UploadFieldReceiver {
+
     String mimeType;
 
     String fileName;
 
     private File file;
 
-    private FieldType fieldType;
-
     private boolean deleteFiles = true;
 
     public FileBuffer() {
-        this(FieldType.UTF8_STRING);
-    }
-
-    public FileBuffer(FieldType fieldType) {
-        setFieldType(fieldType);
     }
 
     /**
@@ -43,7 +35,7 @@ public abstract class FileBuffer implements UploadFieldReceiver {
         mimeType = MIMEType;
         try {
             if (file == null) {
-                file = getFileFactory().createFile(filename, mimeType);
+                //file = getFileFactory().createFile(filename, mimeType);
             }
             return new FileOutputStream(file);
         } catch (final FileNotFoundException e) {
@@ -53,19 +45,19 @@ public abstract class FileBuffer implements UploadFieldReceiver {
 
     /**
      * Helper method for UploadField.
-     * 
+     *
      * @return file or content depending on the configuration
      * @see org.vaadin.easyuploads.UploadFieldReceiver#getValue()
      */
-    public Object getValue() {
+    @Override
+    public byte[] getValue() {
         if (file == null || !file.exists()) {
             return null;
         }
 
-        if (getFieldType() == FieldType.FILE) {
-            return file;
-        }
-
+//        if (getFieldType() == FieldType.FILE) {
+//            return file;
+//        }
         InputStream valueAsStream = getContentAsStream();
 
         try {
@@ -73,24 +65,14 @@ public abstract class FileBuffer implements UploadFieldReceiver {
                     (int) file.length());
             Streams.copy(valueAsStream, bas);
             byte[] byteArray = bas.toByteArray();
-            if (getFieldType() == FieldType.BYTE_ARRAY) {
-                return byteArray;
-            } else {
-                return new String(byteArray);
-            }
+            return byteArray;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     /*
-     * contains default impelmentation to allow usage of this class elsewhere
-     * (lazy programmer don't have proper class heirarchy...)
-     */
-    public FieldType getFieldType() {
-        return fieldType;
-    }
-
+    @Override
     public InputStream getContentAsStream() {
         try {
             return new FileInputStream(getFile());
@@ -166,9 +148,8 @@ public abstract class FileBuffer implements UploadFieldReceiver {
     }
 
     /**
-     * @param deleteFiles
-     *            true if file should be deleted when setting value to null or
-     *            any other new value
+     * @param deleteFiles true if file should be deleted when setting value to
+     * null or any other new value
      */
     public void setDeleteFiles(boolean deleteFiles) {
         this.deleteFiles = deleteFiles;
@@ -176,9 +157,13 @@ public abstract class FileBuffer implements UploadFieldReceiver {
 
     /**
      * @return true if files should be deleted when setting value to null/new
-     *         value
+     * value
      */
     public boolean isDeleteFiles() {
         return deleteFiles;
+    }
+
+    File getFile() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

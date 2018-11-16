@@ -8,7 +8,7 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.vaadin.client.VConsole;
 import com.vaadin.client.ui.VNotification;
-import com.vaadin.v7.client.ui.VUpload;
+import com.vaadin.client.ui.VUpload;
 import com.vaadin.client.ui.dd.VHtml5File;
 
 public class VCustomUpload extends VUpload implements HasFileUpload {
