@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.vaadin.addon</groupId>
     <artifactId>easyuploads</artifactId>
-    <version>9.0.0-SNAPSHOT</version>
+    <version>9.0.0</version>
     <name>EasyUploads</name>
 
     <organization>
@@ -14,7 +14,7 @@
         <url>https://github.com/parttio/easyuploads</url>
         <connection>scm:git:git://github.com/parttio/easyuploads.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:/parttio/easyuploads.git</developerConnection>
-        <tag>vaadin upload add-on</tag>
+        <tag>easyuploads-9.0.0</tag>
     </scm>
 
     <issueManagement>
