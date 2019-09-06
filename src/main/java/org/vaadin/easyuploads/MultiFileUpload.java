@@ -55,9 +55,9 @@ import java.io.IOException;
  * low.
  * <p>
  * Developer handles uploaded files by implementing the abstract
- * {@link #handleFile(File, String, String, long)} method. There developer can either
- * read the file contents and handle it somehow or move the file to a location in 
- * filesystem.
+ * {@link #handleFile(File, String, String, long)} method. There developer can
+ * either read the file contents and handle it somehow or move the file to a
+ * location in filesystem.
  *
  */
 @SuppressWarnings("serial")
@@ -467,6 +467,10 @@ public abstract class MultiFileUpload extends CssLayout implements DropHandler {
     }
 
     /**
+     * Sets the accept property of the upload input to instruct browser to allow
+     * choosing only appropriate files. See
+     * https://www.w3schools.com/tags/att_input_accept.asp for more details.
+     *
      * @param acceptString the accept filter
      */
     public void setAcceptFilter(String acceptString) {
